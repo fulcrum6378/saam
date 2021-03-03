@@ -1,0 +1,18 @@
+.nav-tabs {
+    border-bottom: 1px solid #888;
+}
+.nav-link {
+    font-family: sans-serif;
+    background-color: #333;
+    color: #FFF;
+    border: 1px solid #777 !important;
+    border-right: none !important;
+    border-radius: 0px !important;
+}
+.nav-link.active {
+    background-color: #555 !important;
+    color: #FFF !important;
+}
+.nav-link:last-child {
+    border-left: none !important;
+}

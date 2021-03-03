@@ -1,0 +1,57 @@
+html, body {
+    background-color: #333;
+    margin: 0;
+    padding: 0;
+    font-family: yekan, Roboto, Arial, Sans-serif !important;
+    color: #FFF;
+    direction: rtl;
+    overflow-x: hidden;
+}
+#header {
+    margin: 33px 0;
+}
+#header span {
+    position: absolute;
+    right: calc(5% + 20px);
+    top: 25px;
+    padding: 9px 20px;
+    display: block;
+    cursor: pointer;
+    border: 1px solid #999;
+    border-radius: 5px;
+    font-size: 19px;
+    display: none;
+}
+#header span:hover {
+    background-color: #555;
+}
+#main {
+    width: 100%;
+    padding: 0 0 35px 0;
+    transition: all 600ms;
+}
+
+img.indicator {
+    width: 20px;
+    height: 20px;
+    animation: indicate 3200ms infinite;
+}
+
+
+@keyframes indicate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(1800deg); }
+}
+
+
+@media only screen and (max-width: 950px) {
+}
+
+@font-face {
+    font-family: Roboto, Sans-serif;
+    src: url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+}
+@font-face {
+    font-family: yekan;
+    src: url('./font/yekan.ttf');
+}

@@ -1,0 +1,11 @@
+#installer {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    transform: translateY(-50%);
+}
+#installation_progress {
+    width: 75%;
+}
