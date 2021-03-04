@@ -21,24 +21,15 @@ function classify() {
     $.ajax({
         url: "/action?q=classify",
         context: document.body,
-        timeout: 5 * 60 * 60000 // 5 hours
+        timeout: 5000
     }).done(function(data) {
-        if (data == "branches_done") {
-            its_ok();
-        } else alert("FAILED: " + data);
+        if (data != "started") alert("FAILED: " + data);
     });
     $("#loading").slideUp(200);
     $("#installation_progress").fadeOut(1, function() { $(this).removeClass("invisible"); });
     $("#installation_progress").fadeIn(500);
-    setInterval(function() {
-        $.ajax({
-            url: "/query?q=install_progress",
-            context: document.body,
-            timeout: 4900
-        }).done(function(data) {
-            set_progress(data);
-        })
-    }, 5000);
+    update();
+    setInterval(function() { update(); }, 5000);
 }
 function set_progress(data) {
     let percent = "0%";
@@ -48,4 +39,14 @@ function set_progress(data) {
         .animate({width: percent})
         .text(percent)
         .attr("aria-valuenow", percent.substring(0, percent.length - 1));
+}
+function update() {
+    $.ajax({
+        url: "/query?q=install_progress",
+        context: document.body,
+        timeout: 4900
+    }).done(function(data) {
+        if (data == "None") location.reload();
+        set_progress(data);
+    })
 }

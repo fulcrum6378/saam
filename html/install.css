@@ -6,6 +6,21 @@
     text-align: center;
     transform: translateY(-50%);
 }
+#installer p:nth-child(1) {
+    font-size: 25px;
+}
+#installer p:nth-child(2) {
+    font-size: 21px;
+}
 #installation_progress {
     width: 75%;
+}
+
+@media only screen and (max-width: 450px) {
+    #installer p:nth-child(1) {
+        font-size: 20px;
+    }
+    #installer p:nth-child(2) {
+        font-size: 17px;
+    }
 }

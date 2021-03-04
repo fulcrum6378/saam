@@ -11,10 +11,35 @@ import func as fn
 
 @request_map("/")
 def index():
-    if not isInstalled():
-        htm = fn.template("سام: راه اندازی", "install")
+    if install_progress is not None:
+        status = "installing"
     else:
+        c = fn.cur()
+        c.execute("SHOW TABLES")
+        all_set = True
+        tables = fn.tables(c)
+        for k, v in fn.required_tables.items():
+            if k not in tables:
+                all_set = False
+        if all_set:
+            status = "yes"
+        else:
+            status = "no"
+
+    if status == "no":
+        with open("./html/installing.html", "r", encoding="utf-8") as f:
+            installing = f.read()
+            f.close()
+        htm = fn.template("سام: راه اندازی", "install")
+        htm = htm.replace("<center />", installing)
+    elif status == "yes":
         data = "<body>\n"
+        data += '<img src="./html/img/settings_1.png" class="fixedIcon" id="settings" ' \
+                + 'data-bs-toggle="dropdown" aria-expanded="false">'
+        data += '<ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="settings">\n' \
+                + '    <li class="dropdown-item" onclick="reset();">نصب و راه اندازی مجدد</li>\n' \
+                + '</ul>\n'
+        data += '<img src="./html/img/search_1.png" class="fixedIcon" id="search" onclick="search();">'
         data += fn.header("گروه ها")
         data += '<center id="main">\n'
         c = fn.cur()
@@ -25,14 +50,25 @@ def index():
             load.append({"i": b[0], "n": b[1], "s": len(list(c))})
         load.sort(key=lambda k: k["n"])
         for b in load:
-            data += '<p style="opacity: 0;" onclick="branch(' \
-                    + str(b["i"]) + ');">' \
+            data += '<p style="opacity: 0;" onclick="branch(' + str(b["i"]) + ');">' \
                     + str(load.index(b) + 1) + ". " + str(b["n"]) \
                     + " &nbsp;&nbsp;&nbsp; { " + str(b["s"]) + ' }</p>\n'
         data += '</center>\n'
         data += '<script type="text/javascript" src="./html/branch.js"></script>\n'
         data += "</body>"
         htm = fn.template("سام: گروه ها", "branch", data)
+    elif status == "installing":
+        data = '<body>\n'
+        data += '<center id="installer">\n'
+        with open("./html/installing.html", "r", encoding="utf-8") as f:
+            data += f.read().replace(" invisible", "") + '\n'
+            f.close()
+        data += '</center>\n'
+        data += '<script type="text/javascript" src="./html/installing.js"></script>\n'
+        data += '</body>\n'
+        htm = fn.template("سام: راه اندازی", "install", data)
+    else:  # http://192.168.1.7:1399/action?q=reset
+        return 500
     return 200, Headers({"Content-Type": "text/html"}), htm
 
 
@@ -67,11 +103,13 @@ def branch(i: str):
     for s in load:
         tid = 'sym_' + str(s["i"])
         cid = 'chk_' + str(s["i"])
+        sym_inf = str(s["f"])
+        if sym_inf == "None": sym_inf = "-"
         data += '<div class="symbol dropdown" style="opacity: 0;" ' \
                 + 'onclick="symbol_toggle($(this).next());">\n' \
                 + '    <input class="form-check-input chk_sym" type="checkbox" id="' + cid + '">\n' \
                 + '    <label>' + str(load.index(s) + 1) + ". " + str(s["n"]) + "</label>\n" \
-                + '    <br><span>' + str(s["f"]) + '</span>\n' \
+                + '    <br><span>' + sym_inf + '</span>\n' \
                 + '    <img src="./html/img/three_dotts_1.png" class="more" id="' + tid + '" ' \
                 + 'data-bs-toggle="dropdown" aria-expanded="false">\n'
         data += '    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="' + tid + '">\n' \
@@ -226,37 +264,8 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         global classifying
         if classifying: return "already"
         classifying = True
-        c.execute("SELECT * FROM symbol")  # gives the same tuple you inserted.
-        symbols = list()  # list of tuples
-        for i in c: symbols.append(i)
-
-        sum_all = len(symbols)
-
-        for s in range(sum_all):
-            set_progress(s, sum_all)
-
-            # Find branch
-            symbol_name = symbols[s][1]
-            branch = tse.Ticker(symbol_name).group_name  # fun.sql_esc()
-            print(branch)
-
-            # Check if it exists in 'branch'
-            c.execute("SELECT * FROM branch WHERE name='" + branch + "' LIMIT 1")
-            exists = list()
-            for i in c: exists.append(i)
-            if len(exists) == 0:
-                c.execute("INSERT INTO branch (name) VALUES (%s)", branch)
-                dt.connect.commit()
-                branch_id = c.lastrowid
-            else:
-                branch_id = exists[0][0]
-
-            # Update symbol
-            c.execute("UPDATE symbol SET branch='" + str(branch_id) + "' WHERE name='" + symbol_name + "'")
-            dt.connect.commit()
-
-        classifying = False
-        return "branches_done"
+        fn.Classify().start()
+        return "started"
 
     elif q == "analyze":
         try:
@@ -271,26 +280,27 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             return "invalid date"
         analyze.Analyze(a1, a2, a, b).start()
         return "..."
+
+    elif q == "reset":
+        try:
+            for rt in fn.required_tables.keys():
+                c.execute("DROP TABLE IF EXISTS " + rt)
+        except:
+            return "aborted"
+        return "done"
+
     else:
         return 500
 
 
-def isInstalled():
-    if install_progress is not None:
-        return "installing"
-    c = fn.cur()
-    c.execute("SHOW TABLES")
-    all_set = True
-    tables = fn.tables(c)
-    for k, v in fn.required_tables.items():
-        if k not in tables:
-            all_set = False
-    if all_set:
-        return "yes"
-    else:
-        return "no"
-
-
-def set_progress(a, b):  # never change global statements inside a loop
+def set_progress(a, b=None):  # never change global statements inside a loop
     global install_progress
-    install_progress = (100 / b) * a
+    if a is not None:
+        install_progress = (100 / b) * a
+    else:
+        install_progress = None
+
+
+def set_classifying(b):
+    global classifying
+    classifying = b

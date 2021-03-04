@@ -1,3 +1,5 @@
+import pytse_client as tse
+import threading as th
 from typing import List
 
 import data as dt
@@ -77,3 +79,39 @@ def header(title: str = "سام"):
         f.close()
     htm = htm.replace('{title}', title)
     return htm
+
+
+class Classify(th.Thread):
+    def run(self):
+        from controller import set_progress, set_classifying
+        c = cur()
+        c.execute("SELECT * FROM symbol")  # gives the same tuple you inserted.
+        symbols = list()  # list of tuples
+        for i in c: symbols.append(i)
+
+        sum_all = len(symbols)
+
+        for s in range(sum_all):
+            set_progress(s, sum_all)
+
+            # Find branch
+            symbol_name = symbols[s][1]
+            branch = tse.Ticker(symbol_name).group_name  # fun.sql_esc()
+            print(branch)
+
+            # Check if it exists in 'branch'
+            c.execute("SELECT * FROM branch WHERE name='" + branch + "' LIMIT 1")
+            exists = list()
+            for i in c: exists.append(i)
+            if len(exists) == 0:
+                c.execute("INSERT INTO branch (name) VALUES (%s)", branch)
+                dt.connect.commit()
+                branch_id = c.lastrowid
+            else:
+                branch_id = exists[0][0]
+
+            # Update symbol
+            c.execute("UPDATE symbol SET branch='" + str(branch_id) + "' WHERE name='" + symbol_name + "'")
+            dt.connect.commit()
+        set_classifying(False)
+        set_progress(None)

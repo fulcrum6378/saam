@@ -36,6 +36,23 @@ img.indicator {
     height: 20px;
     animation: indicate 3200ms infinite;
 }
+img.fixedIcon {
+    width: 40px;
+    height: 40px;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    cursor: pointer;
+    opacity: 0.75;
+    transition: opacity 200ms;
+    z-index: 1;
+}
+img.fixedIcon:hover {
+    opacity: 1;
+}
+[onclick], input[type="checkbox"] {
+    cursor: pointer;
+}
 
 
 @keyframes indicate {

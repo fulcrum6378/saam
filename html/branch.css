@@ -3,7 +3,6 @@
     border-bottom: 1px solid #555;
     padding: 10px 15px;
     text-align: right;
-    cursor: pointer;
     font-size: 15px;
     margin: 0;
 }
@@ -12,4 +11,7 @@
 }
 #main > p:last-child {
     border-bottom: none;
+}
+#search {
+    top: 60px;
 }

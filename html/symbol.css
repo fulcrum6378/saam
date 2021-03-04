@@ -3,15 +3,11 @@ div.symbol {
     border-bottom: 1px solid #555;
     padding: 10px 15px;
     text-align: right;
-    cursor: pointer;
     font-size: 15px;
     margin: 0;
 }
 div.symbol:last-of-type {
     border-bottom: none;
-}
-div.symbol > input[type="checkbox"] {
-    cursor: pointer;
 }
 div.symbol > label {
     padding-right: 7px;
@@ -20,6 +16,7 @@ div.symbol > label {
 }
 div.symbol > span {
     cursor: text;
+    font-size: 10px;
 }
 .overflow {
     width: calc(90% - 20px);
@@ -32,9 +29,6 @@ div.symbol > span {
 }
 div.symbol:hover {
     background-color: #555;
-}
-div.symbol > span {
-    font-size: 9.5px;
 }
 div.symbol > img.more {
     width: 27px;
