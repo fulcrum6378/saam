@@ -10,9 +10,7 @@ div.symbol:last-of-type {
     border-bottom: none;
 }
 div.symbol > label {
-    padding-right: 7px;
-    font-size: 15px;
-    cursor: pointer;
+    padding-right: 5px;
 }
 div.symbol > span {
     cursor: text;
@@ -60,12 +58,13 @@ div.symbol > img.more {
 .overflow > p:hover {
     background-color: #3F3F3F;
 }
-.overflow > p > span:first-child {
+.overflow > p > label {
     text-align: right;
     font-size: 12px;
+    padding-right: 5px;
     font-family: sans-serif;
 }
-.overflow > p > span:last-child {
+.overflow > p > span {
     text-align: left;
     font-size: 13px;
     float: left;

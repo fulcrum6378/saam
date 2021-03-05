@@ -25,7 +25,7 @@ print("Initializing local server...")
 try:
     my_ip = ni.ifaddresses(ni.gateways()['default'][ni.AF_INET][1])[ni.AF_INET][0]['addr']
 except:
-    my_ip = "192.168.1.7"
+    my_ip = "192.168.1.7"  # 127.0.0.1 later
 
 print("\nhttp://" + str(my_ip) + ":1399/\n")
 try:

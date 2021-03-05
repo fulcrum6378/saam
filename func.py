@@ -6,7 +6,7 @@ import data as dt
 
 required_tables = {  # NEVER USE 'desc' or 'group' AS TABLE NAME
     "symbol": "(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(75), info VARCHAR(200) DEFAULT NULL, "
-              + "branch INT DEFAULT '-1', auto TINYINT DEFAULT '0')",
+              + "branch INT DEFAULT '-1', auto SMALLINT DEFAULT '0')",
     "branch": "(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(150))"
 }
 
@@ -29,6 +29,17 @@ def tables(c):
         except IndexError:
             pass
     return tbs
+
+
+def auto_to_binary(stat: int, length: int) -> str:
+    initial = bin(stat)[2:]  # bin() -> str
+    pre = ""
+    dist = length - len(initial)
+    if dist < 0:
+        print("درون جدول نمادها ناهماهنگی پیدا شد در ستون «auto»!")
+        return "".join(['0' for _ in range(length)])
+    for x in range(dist): pre += '0'
+    return pre + initial
 
 
 def tf_name(tf: int):

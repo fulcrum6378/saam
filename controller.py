@@ -65,7 +65,7 @@ def index():
             f.close()
         data += '</center>\n'
         data += '<script type="text/javascript" src="./html/installing.js"></script>\n'
-        data += '</body>\n'
+        data += '</body>'
         htm = fn.template("سام: راه اندازی", "install", data)
     else:  # http://192.168.1.7:1399/action?q=reset
         return 500
@@ -83,9 +83,10 @@ def branch(i: str):
     data = "<body>\n"
     data += fn.header(name)
     data += '<center id="main">\n'
-    c.execute("SELECT * FROM symbol WHERE branch = '" + i + "'")
+    c.execute("SELECT id, name, info, auto FROM symbol WHERE branch = '" + i + "'")
     load = list()
-    for s in c: load.append({"i": s[0], "n": s[1], "f": s[2], "z": None})
+    for s in c: load.append({"i": s[0], "n": s[1], "f": s[2], "z": None,
+                             "a": fn.auto_to_binary(s[3], len(dt.config["timeframes"]))})
     c.execute("SHOW TABLES")
     tbs = fn.tables(c)
     for s in load:
@@ -105,9 +106,12 @@ def branch(i: str):
         cid = 'chk_' + str(s["i"])
         sym_inf = str(s["f"])
         if sym_inf == "None": sym_inf = "-"
+        sym_checked = " checked" if "0" not in s["a"] else ""
+        sym_indete = " indeterminate" if "0" in s["a"] and "1" in s["a"] else ""
         data += '<div class="symbol dropdown" style="opacity: 0;" ' \
                 + 'onclick="symbol_toggle($(this).next());">\n' \
-                + '    <input class="form-check-input chk_sym" type="checkbox" id="' + cid + '">\n' \
+                + '    <input class="form-check-input chk_sym' + sym_indete + '" type="checkbox" ' \
+                + 'id="' + cid + '" data-symbol="' + str(s["i"]) + '"' + sym_checked + '>\n' \
                 + '    <label>' + str(load.index(s) + 1) + ". " + str(s["n"]) + "</label>\n" \
                 + '    <br><span>' + sym_inf + '</span>\n' \
                 + '    <img src="./html/img/three_dotts_1.png" class="more" id="' + tid + '" ' \
@@ -124,8 +128,11 @@ def branch(i: str):
                 an = "هیچ وقت"
             elif an == "...":
                 an = '<img src="./html/img/indicator_1.png" class="indicator">'
-            data += '    <p onclick="tfClick(' + str(t["value"]) + ', ' + str(s["i"]) + ')"><span>' \
-                    + str(t["visName"]) + '</span><span>' + str(an) + '<span></p>\n'
+            tf_checked = " checked" if s["a"][tf.index(t)] == "1" else ""
+            data += '    <p onclick="tfClick(' + str(t["value"]) + ', ' + str(s["i"]) + ')">' \
+                    + '<input class="form-check-input chk_sym" type="checkbox" id="' + cid + '" ' \
+                    + 'data-symbol="' + str(s["i"]) + '" data-frame="' + str(tf.index(t)) + '"' + tf_checked + '>\n' \
+                    + '<label>' + str(t["visName"]) + '</label><span>' + str(an) + '<span></p>\n'
         data += '</div>\n'
     data += '</center>\n'
     data += '<script type="text/javascript" src="./html/symbol.js"></script>\n'
@@ -227,11 +234,6 @@ def query(q: str, a1: str = "", a2: str = "", a3: str = ""):
         return 500
 
 
-fetching = False
-classifying = False
-install_progress = None
-
-
 @request_map("/action", method="GET")
 def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
     c = fn.cur()
@@ -267,6 +269,24 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         fn.Classify().start()
         return "started"
 
+    elif q == "check":
+        c.execute("SELECT auto FROM symbol WHERE id='" + a1 + "' LIMIT 1")
+        try:
+            stat = c.fetchone()[0]  # int
+        except IndexError:
+            return "not found"
+        length = len(dt.config["timeframes"])
+        binary = fn.auto_to_binary(stat, length)
+        if a2 == "-1":
+            binary = "".join([a3 for _ in range(length)])
+        else:
+            binary = list(binary)
+            binary[int(a2)] = a3
+            binary = "".join(binary)
+        c.execute("UPDATE symbol SET auto = '" + str(int(binary, 2)) + "' WHERE id='" + a1 + "'")
+        dt.connect.commit()
+        return binary
+
     elif q == "analyze":
         try:
             got = a3.split(" - ")
@@ -291,6 +311,11 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
 
     else:
         return 500
+
+
+fetching = False
+classifying = False
+install_progress = None
 
 
 def set_progress(a, b=None):  # never change global statements inside a loop

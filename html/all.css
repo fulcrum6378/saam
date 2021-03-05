@@ -50,7 +50,7 @@ img.fixedIcon {
 img.fixedIcon:hover {
     opacity: 1;
 }
-[onclick], input[type="checkbox"] {
+[onclick], input[type="checkbox"], label {
     cursor: pointer;
 }
 

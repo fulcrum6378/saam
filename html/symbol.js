@@ -8,20 +8,49 @@ for (i = 0; i < all.length; i++) {
 }
 
 // Checkboxes
+$(".indeterminate").prop("indeterminate", true);
 $(".chk_sym").click(function(e) {
     let t = $(this)[0];
     if (t.indeterminate) {
-        t.checked = false; // will become true immediately.
+        cbChange(t, false); // will become true immediately.
         return false;
+    } else {
+        e.stopPropagation();
+        cbChange(t);
     }
-    else e.stopPropagation();
 });
 $(".chk_sym ~ label").click(function(e) {
     let t = $(this).prev()[0];
-    if (t.indeterminate) t.checked = true;
-    else t.checked = !t.checked;
+    if (t.indeterminate) cbChange(t, true);
+    else cbChange(t, !t.checked);
     return false;
 });
+function cbChange(t, b = t.checked) {
+    t.checked = b;
+    let tf = $(t).attr("data-frame");
+    if (tf == undefined) tf = "-1";
+    let boo = "0";
+    if (b) boo = "1";
+    $.ajax({
+        url: "/action?q=check&a1=" + $(t).attr("data-symbol") + "&a2=" + tf + "&a3=" + boo,
+        context: document.body,
+        timeout: 5000
+    }).done(function(data) {
+        if (data == "not found") { alert(data); return; }
+        if ($(t).attr("data-frame") === undefined)
+            updateCheckboxes(data, t, $(t).parent().next());
+        else
+            updateCheckboxes(data, $(t).parent().parent().prev().children().first()[0], $(t).parent().parent());
+    });
+}
+function updateCheckboxes(data, boss, overflow) {
+    let binary = data.split("");
+    if (data.indexOf("0") == -1) boss.checked = true;
+    else if (data.indexOf("1") == -1) boss.checked = false;
+    else boss.indeterminate = true;
+    for (i = 0; i < overflow.children().length; i++)
+        overflow.children().eq(i).children().first()[0].checked = binary[i] == "1";
+}
 
 
 
