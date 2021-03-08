@@ -6,6 +6,10 @@ div.symbol {
     font-size: 15px;
     margin: 0;
 }
+div.symbol#found {
+    background-color: rgba(200, 0, 200, 0.25);
+    box-shadow: 0 0 6px #AAA;
+}
 div.symbol:last-of-type {
     border-bottom: none;
 }

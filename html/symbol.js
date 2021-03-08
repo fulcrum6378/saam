@@ -52,6 +52,10 @@ function updateCheckboxes(data, boss, overflow) {
         overflow.children().eq(i).children().first()[0].checked = binary[i] == "1";
 }
 
+// Search
+$([document.documentElement, document.body]).animate({
+    scrollTop: $("#found").offset().top
+}, 666);
 
 
 

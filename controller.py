@@ -73,7 +73,7 @@ def index():
 
 
 @request_map("/branch", method="GET")
-def branch(i: str):
+def branch(i: str, found: str):
     c = fn.cur()
     c.execute("SELECT name FROM branch WHERE id = '" + str(i) + "' LIMIT 1")
     name = c.fetchone()
@@ -94,10 +94,10 @@ def branch(i: str):
         for t in dt.config["timeframes"]:
             tName = str(s["i"]) + "_" + t["name"]
             if tName in tbs:
-                found = fn.since_until(c, tName)
+                got = fn.since_until(c, tName)
             else:
-                found = None
-            tfs[t["name"]] = found
+                got = None
+            tfs[t["name"]] = got
         s["z"] = tfs
     load.sort(key=lambda k: k["n"])
     tf = dt.config["timeframes"]
@@ -108,7 +108,8 @@ def branch(i: str):
         if sym_inf == "None": sym_inf = "-"
         sym_checked = " checked" if "0" not in s["a"] else ""
         sym_indete = " indeterminate" if "0" in s["a"] and "1" in s["a"] else ""
-        data += '<div class="symbol dropdown" style="opacity: 0;" ' \
+        sym_found = ' id="found"' if str(s["i"]) == found else ""
+        data += '<div class="symbol dropdown"' + sym_found + ' style="opacity: 0;" ' \
                 + 'onclick="symbol_toggle($(this).next());">\n' \
                 + '    <input class="form-check-input chk_sym' + sym_indete + '" type="checkbox" ' \
                 + 'id="' + cid + '" data-symbol="' + str(s["i"]) + '"' + sym_checked + '>\n' \
@@ -183,6 +184,28 @@ def view(i: str):
     data += '<script type="text/javascript" src="./html/view.js"></script>\n'
     data += "</body>"
     htm = fn.template("سام: " + name, "view", data)
+    return 200, Headers({"Content-Type": "text/html"}), htm
+
+
+@request_map("/search")
+def search():
+    c = fn.cur()
+    c.execute("SELECT id, name, branch FROM symbol")
+    every = list(c)
+    every.sort(key=lambda k: k[1])
+
+    data = "<body>\n"
+    data += '<center id="header">\n'
+    data += '    <input type="text" id="search" placeholder="جستجو">\n'
+    data += '</center>\n'
+    data += '<center id="main">\n'
+    for s in every:
+        data += '<p onclick="goTo(' + str(s[2]) + ', ' + str(s[0]) + ');">' \
+                + str(every.index(s) + 1) + '. ' + s[1] + '</p>\n'
+    data += '</center>\n'
+    data += '<script type="text/javascript" src="./html/search.js"></script>\n'
+    data += "</body>"
+    htm = fn.template("سام: جستجو", "search", data)
     return 200, Headers({"Content-Type": "text/html"}), htm
 
 
