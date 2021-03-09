@@ -1,7 +1,9 @@
 import MetaTrader5 as mt5
+import os
 from persiantools.jdatetime import JalaliDateTime
 from pymysql.err import ProgrammingError
 import pytse_client as tse
+import signal
 from simple_http_server import request_map, PathValue, Headers, StaticFile
 
 import analyze
@@ -38,6 +40,7 @@ def index():
                 + 'data-bs-toggle="dropdown" aria-expanded="false">'
         data += '<ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="settings">\n' \
                 + '    <li class="dropdown-item" onclick="reset();">نصب و راه اندازی مجدد</li>\n' \
+                + '    <li class="dropdown-item" onclick="shutdown();">خاموش</li>\n' \
                 + '</ul>\n'
         data += '<img src="./html/img/search_1.png" class="fixedIcon" id="search" onclick="search();">'
         data += fn.header("گروه ها")
@@ -73,7 +76,7 @@ def index():
 
 
 @request_map("/branch", method="GET")
-def branch(i: str, found: str):
+def branch(i: str, found: str = None):
     c = fn.cur()
     c.execute("SELECT name FROM branch WHERE id = '" + str(i) + "' LIMIT 1")
     name = c.fetchone()
@@ -130,12 +133,14 @@ def branch(i: str, found: str):
             elif an == "...":
                 an = '<img src="./html/img/indicator_1.png" class="indicator">'
             tf_checked = " checked" if s["a"][tf.index(t)] == "1" else ""
-            data += '    <p onclick="tfClick(' + str(t["value"]) + ', ' + str(s["i"]) + ')">' \
+            data += '    <p onclick="tfClick(' + str(t["value"]) + ', ' + str(s["i"]) + ', this);">' \
                     + '<input class="form-check-input chk_sym" type="checkbox" id="' + cid + '" ' \
                     + 'data-symbol="' + str(s["i"]) + '" data-frame="' + str(tf.index(t)) + '"' + tf_checked + '>\n' \
-                    + '<label>' + str(t["visName"]) + '</label><span>' + str(an) + '<span></p>\n'
+                    + '<label>' + str(t["visName"]) + '</label><span>' + str(an) + '</span></p>\n'
         data += '</div>\n'
     data += '</center>\n'
+    data += '<input type="hidden" id="timeSeparator" value="' + dt.config["timeSeparator"] + '">'
+    data += '<input type="hidden" id="dateSeparator" value="' + dt.config["dateSeparator"] + '">'
     data += '<script type="text/javascript" src="./html/symbol.js"></script>\n'
     data += "</body>"
     htm = fn.template("سام: " + name, "symbol", data)
@@ -292,6 +297,14 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         fn.Classify().start()
         return "started"
 
+    elif q == "reset":
+        try:
+            for rt in fn.required_tables.keys():
+                c.execute("DROP TABLE IF EXISTS " + rt)
+        except:
+            return "aborted"
+        return "done"
+
     elif q == "check":
         c.execute("SELECT auto FROM symbol WHERE id='" + a1 + "' LIMIT 1")
         try:
@@ -321,16 +334,11 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             b = JalaliDateTime(int(spl2[0]), int(spl2[1]), int(spl2[2]), int(tim2[0]), int(tim2[1]), 0)
         except:
             return "invalid date"
-        analyze.Analyze(a1, a2, a, b).start()
-        return "..."
+        analyze.Analyzer.put_temp(a1, int(a2), a, b)
+        return "started"
 
-    elif q == "reset":
-        try:
-            for rt in fn.required_tables.keys():
-                c.execute("DROP TABLE IF EXISTS " + rt)
-        except:
-            return "aborted"
-        return "done"
+    elif q == "shutdown":
+        os.kill(os.getpid(), signal.SIGTERM)
 
     else:
         return 500

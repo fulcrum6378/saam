@@ -10,6 +10,7 @@ function branch(i) {
     location.assign(location.href + "branch?i=" + i);
 }
 
+
 // Floating Menu
 function reset() {
     if (!confirm("آیا از این کار مطمئن هستید؟")) return;
@@ -22,6 +23,15 @@ function reset() {
             location.reload();
         else alert(data);
     });
+}
+var onOff = (request, status, error) => { location.reload(); }
+function shutdown() {
+    $.ajax({
+        url: "/action?q=shutdown",
+        context: document.body,
+        timeout: 10000,
+        error: onOff
+    })
 }
 function search() {
     location.assign(location.href + "search");

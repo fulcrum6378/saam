@@ -7,6 +7,7 @@ for (i = 0; i < all.length; i++) {
         .animate({opacity: 1, marginRight: 0}, dist + (60 * i));
 }
 
+
 // Checkboxes
 $(".indeterminate").prop("indeterminate", true);
 $(".chk_sym").click(function(e) {
@@ -45,40 +46,47 @@ function cbChange(t, b = t.checked) {
 }
 function updateCheckboxes(data, boss, overflow) {
     let binary = data.split("");
-    if (data.indexOf("0") == -1) boss.checked = true;
-    else if (data.indexOf("1") == -1) boss.checked = false;
-    else boss.indeterminate = true;
+    if (data.indexOf("0") == -1) {
+        boss.checked = true;
+        boss.indeterminate = false;
+    } else if (data.indexOf("1") == -1) {
+        boss.checked = false;
+        boss.indeterminate = false;
+    } else boss.indeterminate = true;
     for (i = 0; i < overflow.children().length; i++)
         overflow.children().eq(i).children().first()[0].checked = binary[i] == "1";
 }
 
+
 // Search
-$([document.documentElement, document.body]).animate({
-    scrollTop: $("#found").offset().top
-}, 666);
+if ($("#found").length == 1)
+    $([document.documentElement, document.body]).animate({
+        scrollTop: $("#found").offset().top
+    }, 666);
 
 
-
+// Timeframes
 function symbol_toggle(that) {
     if (that.css("display") == "block") that.slideUp(200);
     else that.slideDown(200);
 }
-function tfClick(v, sym) {
+function tfClick(v, sym, that) {
     let cal = new SolarHijri(new Date()), def = dateModel(cal) +" - "+ dateModel(cal);
     let board = prompt("لطفا بازه زمانی موردنظر را انتخاب کنید...", def);
     if (board == null || board == "") return;
     $.ajax({
         url: "/action?q=analyze&a1=" + sym + "&a2=" + v + "&a3=" + board,
         context: document.body,
-        timeout: 10 * 60 * 60000 // 10 hours
+        timeout: 5000
     }).done(function(data) {
-        alert(data);
+        if (data != "started") alert(data);
+        else $(that).children().last().html('<img src="./html/img/indicator_1.png" class="indicator">');
     });
 }
 function z(d) {
     if (d < 10) return "0" + d; else return d;
 }
 function dateModel(cal) {
-    let s = CONFIG.dateSeparator, t = CONFIG.timeSeparator;
+    let s = $("#dateSeparator").val(), t = $("#timeSeparator").val();
     return cal.Y+s+z(cal.M+1)+s+z(cal.D)+s+z(cal.H)+t+z(cal.I);
 }

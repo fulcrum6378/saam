@@ -21,6 +21,8 @@ if isinstance(data.connect, Exception):
     quit()
 print("DONE!")
 
+data.init_analyzer()
+
 print("Initializing local server...")
 try:
     my_ip = ni.ifaddresses(ni.gateways()['default'][ni.AF_INET][1])[ni.AF_INET][0]['addr']

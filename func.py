@@ -62,6 +62,7 @@ def since_until(c, t):
     got: List[dict] = list()
     for g in c: got.append({"id": g[0], "jala": g[1], "time": g[2]})
     if len(got) == 0: return None
+    # return "..." if working.......
     got = sorted(got, key=lambda k: k["time"])
     got = sorted(got, key=lambda k: k["jala"])
     first = got[0]

@@ -1,10 +1,13 @@
 import json
+
 try:
     import netifaces as ni
 except ImportError:
     pass
 import pymysql as mysql  # mysql.connector
 from pytz import timezone
+
+import analyze
 
 
 def get_config():
@@ -26,3 +29,9 @@ def do_connect():
                                 use_unicode=True)
     except Exception:
         connect = False
+
+
+def init_analyzer():
+    global analyzer
+    analyzer = analyze.Analyzer()
+    analyzer.start()

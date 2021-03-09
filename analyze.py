@@ -1,58 +1,51 @@
 from datetime import datetime
-from enum import Enum
+import json
 import MetaTrader5 as mt5
+import os
 from persiantools.jdatetime import JalaliDateTime
 from pytz import utc
 import threading as th
+import time
 from typing import List
 
 import data as dt
 import func as fn
 
 
-class Board:
-    def __init__(self, sym: str, timeframe: int, a: JalaliDateTime, b: JalaliDateTime):
-        self.sym = sym
-        self.timeframe = timeframe
-        a = a.to_gregorian()
-        self.start = datetime(a.year, a.month, a.day, a.hour, a.minute, tzinfo=dt.zone)
-        b = b.to_gregorian()
-        self.end = datetime(b.year, b.month, b.day, b.hour, b.minute, tzinfo=dt.zone)
-        self.state = Board.State.PENDING
-
-    def vis(self):
-        return self.start.strftime("%Y-%m-%d_%H-%M")
-
-    class State(Enum):
-        PENDING = 0
-        WORKING = 1
-        DONE = 2
-
-
-boards: List[Board] = list()
-
-
-class Analyze(th.Thread):
-    def __init__(self, a1, a2, a, b):
+class Analyzer(th.Thread):
+    def __init__(self):
         th.Thread.__init__(self)
-        self.b = Board(a1, int(a2), a, b)
+        self.active = True
 
-    def run(self) -> None:
-        if self.b in boards: return "already"
-        self.b.state = Board.State.WORKING
+    def run(self):
+        while self.active:
+            temp = os.listdir("./temp/")
+            if temp: Analyzer.process(temp[0])
+            time.sleep(5)
+
+    @staticmethod
+    def process(path):
+        with open(path, "r") as f:
+            data: dict = json.loads(f.read())
+            f.close()
+        data["state"] = 1
         c = fn.cur()
-        c.execute("SELECT name FROM symbol WHERE id='" + str(self.b.sym) + "' LIMIT 1")
+        c.execute("SELECT name FROM symbol WHERE id='" + str(data["sym"]) + "' LIMIT 1")
         found = c.fetchone()
         if len(found) == 0:
-            return "Could not find this symbol in the database!!!"  # Repair....
+            Analyzer.annihilate(path)
+            # print("Could not find this symbol in the database!!!")
+            return
         found = found[0]
-        table = str(self.b.sym) + "_" + fn.tf_name(self.b.timeframe)
-        rates = mt5.copy_rates_range(found, self.b.timeframe, self.b.start, self.b.end)
+        table = str(data["sym"]) + "_" + fn.tf_name(data["timeframe"])
+        rates = mt5.copy_rates_range(found, data["timeframe"], data["start"], data["end"])
         if rates is None:
-            try:
-                return str(mt5.last_error())
-            except:
-                return "خطای ناشناخته!"
+            Analyzer.annihilate(path)
+            # try:
+            #     return str(mt5.last_error())
+            # except:
+            #     return "خطای ناشناخته!"
+            return
         if len(rates) > 0:
             data: List[tuple] = list()
             for r in rates:
@@ -72,5 +65,20 @@ class Analyze(th.Thread):
         c.executemany("INSERT INTO " + table +
                       " (open, close, high, low, greg, jala, time) VALUES (%s, %s, %s, %s, %s, %s, %s)", data)
         dt.connect.commit()
-        self.b.state = Board.State.DONE
-        return "done"
+        Analyzer.annihilate(path)
+
+    @staticmethod
+    def put_temp(sym: str, timeframe: int, a: JalaliDateTime, b: JalaliDateTime):
+        a = a.to_gregorian()
+        b = b.to_gregorian()
+        temp = {"sym": sym, "timeframe": timeframe,
+                "start": datetime(a.year, a.month, a.day, a.hour, a.minute, tzinfo=dt.zone),
+                "end": datetime(b.year, b.month, b.day, b.hour, b.minute, tzinfo=dt.zone),
+                "state": 0}  # start.strftime("%Y-%m-%d_%H-%M")
+        with open("./temp/" + str(len(os.listdir("./temp/"))) + ".json", "w") as f:
+            f.write(json.dumps(temp))
+            f.close()
+
+    @staticmethod
+    def annihilate(path):
+        os.remove(path)
