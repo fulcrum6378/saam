@@ -3,6 +3,7 @@
 }
 .nav-link {
     font-family: sans-serif;
+    font-size: 15px;
     background-color: #333;
     color: #FFF;
     border: 1px solid #777 !important;
@@ -32,19 +33,37 @@
     border-top-left-radius: 10px;
 }
 .container > div:first-child > div {
-    font-weight: 500;
+    font-weight: 600;
     padding: 12px 0;
 }
 .container > div > div {
     padding: 6px 0;
+    font-size: 16px;
     cursor: pointer;
 }
 .container > div > div:hover {
     background-color: #444;
+}
+.copied {
+    animation: copied 1000ms;
 }
 .container > div:last-child > div:first-child {
     border-bottom-right-radius: 10px;
 }
 .container > div:last-child > div:last-child {
     border-bottom-left-radius: 10px;
+}
+
+
+
+@keyframes copied {
+    from { background-color: #41A244; }
+    to { background-color: auto; }
+}
+
+
+@media only screen and (max-width: 450px) {
+    .container > div > div {
+        font-size: 12px;
+    }
 }

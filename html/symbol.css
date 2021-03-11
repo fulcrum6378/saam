@@ -1,10 +1,12 @@
-div.symbol {
+div.symbol, .overflow {
     width: calc(90% - 20px);
-    border-bottom: 1px solid #555;
+    margin: 0;
+}
+div.symbol {
     padding: 10px 15px;
+    border-bottom: 1px solid #555;
     text-align: right;
     font-size: 15px;
-    margin: 0;
 }
 div.symbol#found {
     background-color: rgba(200, 0, 200, 0.25);
@@ -20,15 +22,6 @@ div.symbol > span {
     cursor: text;
     font-size: 10px;
 }
-.overflow {
-    width: calc(90% - 20px);
-    border-bottom: 1px solid #555;
-    padding: 10px 15px;
-    text-align: right;
-    cursor: pointer;
-    font-size: 15px;
-    margin: 0;
-}
 div.symbol:hover {
     background-color: #555;
 }
@@ -39,16 +32,15 @@ div.symbol > img.more {
     margin-top: -14px;
 }
 .overflow {
-    border-bottom: none;
-    cursor: default;
-    padding: 8px 30px;
+    padding: 10px 15px;
+    text-align: right;
+    font-size: 15px;
     border-left: 1px solid #555;
     border-bottom: 1px solid #555;
     border-right: 1px solid #555;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
     margin-bottom: 5px;
-    text-align: center:
 }
 .overflow > p {
     margin: 0;
@@ -72,4 +64,11 @@ div.symbol > img.more {
     text-align: left;
     font-size: 13px;
     float: left;
+}
+
+
+@media only screen and (max-width: 450px) {
+    div.symbol, .overflow {
+        width: calc(100% - 20px);
+    }
 }

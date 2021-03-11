@@ -16,5 +16,6 @@
     {"value": 49153, "name": "MN1", "visName": "MN"}
   ],
   "dateSeparator": ".",
-  "timeSeparator": ":"
+  "timeSeparator": ":",
+  "showTimestamp": false
 }

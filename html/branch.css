@@ -12,6 +12,9 @@
 #main > p:last-child {
     border-bottom: none;
 }
+#main > p > span.badge {
+    /*float: left;*/
+}
 #search {
     top: 60px;
 }

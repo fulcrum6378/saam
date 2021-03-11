@@ -60,7 +60,7 @@ def index():
         for b in load:
             data += '<p style="opacity: 0;" onclick="branch(' + str(b["i"]) + ');">' \
                     + str(load.index(b) + 1) + ". " + str(b["n"]) \
-                    + " &nbsp;&nbsp;&nbsp; { " + str(b["s"]) + ' }</p>\n'
+                    + '&nbsp;&nbsp;&nbsp;<span class="badge bg-secondary">' + str(b["s"]) + '</span></p>\n'
         data += '</center>\n'
         data += '<script type="text/javascript" src="./html/branch.js"></script>\n'
         data += "</body>"
@@ -157,6 +157,7 @@ def view(i: str):
     data += '<center id="main">\n'
     tf = dt.config["timeframes"]
     data += '<nav>\n    <div class="nav nav-tabs flex-column flex-sm-row" id="nav-tab" role="tablist">\n'
+    badge_classes = 'badge bg-light text-dark'
     for t in tf:
         con = 'nav-' + t["name"]
         active = ''
@@ -165,7 +166,8 @@ def view(i: str):
                 + 'id="nav-' + t["name"] + '-tab" ' \
                 + 'data-bs-toggle="tab" data-bs-target="#' + con + '" type="button" ' \
                 + 'role="tab" aria-controls="' + con + '" ' \
-                + 'aria-selected="true">' + t["visName"] + '</button>\n'
+                + 'aria-selected="true">' + t["visName"] \
+                + '&nbsp;&nbsp;<span class="' + badge_classes + '">000</span></button>\n'
     data += '    </div>\n</nav>\n'
     data += '<div class="tab-content" id="nav-tabContent">\n'
     for t in tf:
@@ -182,12 +184,17 @@ def view(i: str):
         except ProgrammingError:
             pass
         dt.cur(False)
-        if got is not None:
+        length = str(len(got)) if got is not None else "0"
+        data = data.replace('<span class="' + badge_classes + '">000</span>',
+                            '<span class="' + badge_classes + '">' + length + '</span>', 1)
+        if got is not None and len(got) > 0:
             data += '        <div class="container">\n'
 
             # Table Head
-            data += '            <div class="row row-cols-' + str(len(got)) + '">\n'
-            data += '               <div class="col">یونیکس</div>\n'
+            rows = "8" if dt.config["showTimestamp"] else "7"
+            data += '            <div class="row row-cols-' + rows + '">\n'
+            if dt.config["showTimestamp"]:
+                data += '               <div class="col">یونیکس</div>\n'
             data += '               <div class="col">آغاز</div>\n'
             data += '               <div class="col">اتمام</div>\n'
             data += '               <div class="col">بالا</div>\n'
@@ -200,7 +207,9 @@ def view(i: str):
             # Table Body
             got.sort(key=lambda k: k[0])
             for r in got:
-                data += '            <div class="row row-cols-' + str(len(got)) + '">\n'
+                if not dt.config["showTimestamp"]:
+                    r = r[1:]
+                data += '            <div class="row row-cols-' + str(len(r)) + '">\n'
                 for ii in r:  # DON'T USE "i"!!!
                     data += '               <div class="col">' + str(ii) + '</div>\n'
                 data += '            </div>\n'
