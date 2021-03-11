@@ -16,3 +16,35 @@
 .nav-link:last-child {
     border-left: none !important;
 }
+
+.container {
+    margin-top: 30px;
+    border: 1px solid #999;
+    border-radius: 10px;
+}
+.container > div:first-child {
+    border-bottom: 1px solid #999;
+}
+.container > div:first-child > div:first-child {
+    border-top-right-radius: 10px;
+}
+.container > div:first-child > div:last-child {
+    border-top-left-radius: 10px;
+}
+.container > div:first-child > div {
+    font-weight: 500;
+    padding: 12px 0;
+}
+.container > div > div {
+    padding: 6px 0;
+    cursor: pointer;
+}
+.container > div > div:hover {
+    background-color: #444;
+}
+.container > div:last-child > div:first-child {
+    border-bottom-right-radius: 10px;
+}
+.container > div:last-child > div:last-child {
+    border-bottom-left-radius: 10px;
+}

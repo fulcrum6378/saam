@@ -1,12 +1,14 @@
+import json
 import MetaTrader5 as mt5
 import os
 from persiantools.jdatetime import JalaliDateTime
 from pymysql.err import ProgrammingError
 import pytse_client as tse
 import signal
+# noinspection PyUnresolvedReferences
 from simple_http_server import request_map, PathValue, Headers, StaticFile
 
-import analyze
+from analyze import Analyzer
 import data as dt
 import func as fn
 
@@ -16,10 +18,11 @@ def index():
     if install_progress is not None:
         status = "installing"
     else:
-        c = fn.cur()
+        c = dt.cur(True)
         c.execute("SHOW TABLES")
-        all_set = True
         tables = fn.tables(c)
+        dt.cur(False)
+        all_set = True
         for k, v in fn.required_tables.items():
             if k not in tables:
                 all_set = False
@@ -45,13 +48,15 @@ def index():
         data += '<img src="./html/img/search_1.png" class="fixedIcon" id="search" onclick="search();">'
         data += fn.header("گروه ها")
         data += '<center id="main">\n'
-        c = fn.cur()
+        c = dt.cur(True)
         c.execute("SELECT * FROM branch")
         load = list()
         for b in list(c):
             c.execute("SELECT id FROM symbol WHERE branch = '" + str(b[0]) + "'")
             load.append({"i": b[0], "n": b[1], "s": len(list(c))})
-        load.sort(key=lambda k: k["n"])
+        dt.cur(False)
+
+        load.sort(key=lambda r: r["n"])
         for b in load:
             data += '<p style="opacity: 0;" onclick="branch(' + str(b["i"]) + ');">' \
                     + str(load.index(b) + 1) + ". " + str(b["n"]) \
@@ -77,45 +82,40 @@ def index():
 
 @request_map("/branch", method="GET")
 def branch(i: str, found: str = None):
-    c = fn.cur()
+    c = dt.cur(True)
     c.execute("SELECT name FROM branch WHERE id = '" + str(i) + "' LIMIT 1")
     name = c.fetchone()
+    dt.cur(False)
     if len(name) == 0:
         raise Exception("گروه موردنظر در پایگاه داده یافت نشد!")
     name = name[0]
     data = "<body>\n"
     data += fn.header(name)
-    data += '<center id="main">\n'
+    data += '<center id="main" data-branch="' + i + '">\n'
+    c = dt.cur(True)
     c.execute("SELECT id, name, info, auto FROM symbol WHERE branch = '" + i + "'")
+    got = list(c)
+    dt.cur(False)
     load = list()
-    for s in c: load.append({"i": s[0], "n": s[1], "f": s[2], "z": None,
-                             "a": fn.auto_to_binary(s[3], len(dt.config["timeframes"]))})
-    c.execute("SHOW TABLES")
-    tbs = fn.tables(c)
-    for s in load:
+    for s in got:
         tfs = dict()
         for t in dt.config["timeframes"]:
-            tName = str(s["i"]) + "_" + t["name"]
-            if tName in tbs:
-                got = fn.since_until(c, tName)
-            else:
-                got = None
-            tfs[t["name"]] = got
-        s["z"] = tfs
+            tfs[t["name"]] = Analyzer.since_until(str(s[0]), t["name"])
+        load.append({"i": s[0], "n": s[1], "f": s[2], "z": tfs,
+                     "a": fn.auto_to_binary(s[3], len(dt.config["timeframes"]))})
     load.sort(key=lambda k: k["n"])
     tf = dt.config["timeframes"]
     for s in load:
         tid = 'sym_' + str(s["i"])
-        cid = 'chk_' + str(s["i"])
         sym_inf = str(s["f"])
         if sym_inf == "None": sym_inf = "-"
         sym_checked = " checked" if "0" not in s["a"] else ""
         sym_indete = " indeterminate" if "0" in s["a"] and "1" in s["a"] else ""
         sym_found = ' id="found"' if str(s["i"]) == found else ""
         data += '<div class="symbol dropdown"' + sym_found + ' style="opacity: 0;" ' \
-                + 'onclick="symbol_toggle($(this).next());">\n' \
+                + 'onclick="symbol_toggle($(this).next());" id="div_' + str(s["i"]) + '">\n' \
                 + '    <input class="form-check-input chk_sym' + sym_indete + '" type="checkbox" ' \
-                + 'id="' + cid + '" data-symbol="' + str(s["i"]) + '"' + sym_checked + '>\n' \
+                + 'data-symbol="' + str(s["i"]) + '"' + sym_checked + '>\n' \
                 + '    <label>' + str(load.index(s) + 1) + ". " + str(s["n"]) + "</label>\n" \
                 + '    <br><span>' + sym_inf + '</span>\n' \
                 + '    <img src="./html/img/three_dotts_1.png" class="more" id="' + tid + '" ' \
@@ -125,22 +125,18 @@ def branch(i: str, found: str = None):
                 + 'نمایش تمام کندل ها' + '</a></li>\n' \
                 + '    </ul>\n'
         data += '</div>\n'
-        data += '<div class="overflow" style="display: none;">\n'
+        data += '<div class="overflow" style="display: none;" id="ovf_' + str(s["i"]) + '">\n'
         for t in tf:
-            an = s["z"][t["name"]]
-            if an is None:
-                an = "هیچ وقت"
-            elif an == "...":
-                an = '<img src="./html/img/indicator_1.png" class="indicator">'
             tf_checked = " checked" if s["a"][tf.index(t)] == "1" else ""
-            data += '    <p onclick="tfClick(' + str(t["value"]) + ', ' + str(s["i"]) + ', this);">' \
-                    + '<input class="form-check-input chk_sym" type="checkbox" id="' + cid + '" ' \
+            data += '    <p onclick="tfClick(' + str(t["value"]) + ', ' + str(s["i"]) + ', this);" ' \
+                    + 'class="' + t["name"] + '">' \
+                    + '<input class="form-check-input chk_sym" type="checkbox" ' \
                     + 'data-symbol="' + str(s["i"]) + '" data-frame="' + str(tf.index(t)) + '"' + tf_checked + '>\n' \
-                    + '<label>' + str(t["visName"]) + '</label><span>' + str(an) + '</span></p>\n'
+                    + '<label>' + str(t["visName"]) + '</label><span>' + s["z"][t["name"]] + '</span></p>\n'
         data += '</div>\n'
     data += '</center>\n'
-    data += '<input type="hidden" id="timeSeparator" value="' + dt.config["timeSeparator"] + '">'
-    data += '<input type="hidden" id="dateSeparator" value="' + dt.config["dateSeparator"] + '">'
+    data += '<input type="hidden" id="timeSeparator" value="' + dt.config["timeSeparator"] + '">\n'
+    data += '<input type="hidden" id="dateSeparator" value="' + dt.config["dateSeparator"] + '">\n'
     data += '<script type="text/javascript" src="./html/symbol.js"></script>\n'
     data += "</body>"
     htm = fn.template("سام: " + name, "symbol", data)
@@ -149,9 +145,10 @@ def branch(i: str, found: str = None):
 
 @request_map("/view", method="GET")
 def view(i: str):
-    c = fn.cur()
+    c = dt.cur(True)
     c.execute("SELECT name FROM symbol WHERE id = '" + str(i) + "' LIMIT 1")
     name = c.fetchone()
+    dt.cur(False)
     if len(name) == 0:
         raise Exception("نماد موردنظر در پایگاه داده یافت نشد!")
     name = name[0]
@@ -167,24 +164,49 @@ def view(i: str):
         data += '        <button class="nav-link flex-sm-fill text-sm-center' + active + '" ' \
                 + 'id="nav-' + t["name"] + '-tab" ' \
                 + 'data-bs-toggle="tab" data-bs-target="#' + con + '" type="button" ' \
-                + ' role="tab" aria-controls="' + con + '" ' \
-                + 'aria-selected="true">' + t["visName"] + '</button>'
+                + 'role="tab" aria-controls="' + con + '" ' \
+                + 'aria-selected="true">' + t["visName"] + '</button>\n'
     data += '    </div>\n</nav>\n'
     data += '<div class="tab-content" id="nav-tabContent">\n'
     for t in tf:
         active = ''
         if t == tf[0]: active = ' show active'
-        data += '<div class="tab-pane fade' + active + '" id="nav-' + t["name"] + '" ' \
-                + 'role="tabpanel" aria-labelledby="nav-' + t["name"] + '-tab">'
-        tName = i + "_" + t["name"]
+        data += '    <div class="tab-pane fade' + active + '" id="nav-' + t["name"] + '" ' \
+                + 'role="tabpanel" aria-labelledby="nav-' + t["name"] + '-tab">\n'
+        tName = str(i) + "_" + t["name"]
+        c = dt.cur(True)
+        got = None
         try:
             c.execute("SELECT * FROM " + tName)
-            for r in c:
-                data += str(r) + '<br>\n'
+            got = list(c)
         except ProgrammingError:
             pass
-        data += '</div>'
-    data += '<div>\n'
+        dt.cur(False)
+        if got is not None:
+            data += '        <div class="container">\n'
+
+            # Table Head
+            data += '            <div class="row row-cols-' + str(len(got)) + '">\n'
+            data += '               <div class="col">یونیکس</div>\n'
+            data += '               <div class="col">آغاز</div>\n'
+            data += '               <div class="col">اتمام</div>\n'
+            data += '               <div class="col">بالا</div>\n'
+            data += '               <div class="col">پایین</div>\n'
+            data += '               <div class="col">میلادی</div>\n'
+            data += '               <div class="col">جلالی</div>\n'
+            data += '               <div class="col">زمان</div>\n'
+            data += '            </div>\n'
+
+            # Table Body
+            got.sort(key=lambda k: k[0])
+            for r in got:
+                data += '            <div class="row row-cols-' + str(len(got)) + '">\n'
+                for ii in r:  # DON'T USE "i"!!!
+                    data += '               <div class="col">' + str(ii) + '</div>\n'
+                data += '            </div>\n'
+            data += '        </div>\n'
+        data += '    </div>\n'
+    data += '</div>\n'
     data += '</center>\n'
     data += '<script type="text/javascript" src="./html/view.js"></script>\n'
     data += "</body>"
@@ -194,9 +216,10 @@ def view(i: str):
 
 @request_map("/search")
 def search():
-    c = fn.cur()
+    c = dt.cur(True)
     c.execute("SELECT id, name, branch FROM symbol")
     every = list(c)
+    dt.cur(False)
     every.sort(key=lambda k: k[1])
 
     data = "<body>\n"
@@ -258,21 +281,36 @@ def favicon():
 def query(q: str, a1: str = "", a2: str = "", a3: str = ""):
     if q == "install_progress":
         return str(install_progress)
+
+    elif q == "branch_states":
+        c = dt.cur(True)
+        c.execute("SELECT id FROM symbol WHERE branch = '" + a1 + "'")
+        got = list(c)
+        dt.cur(False)
+        load = list()
+        for s in got:
+            tfs = dict()
+            for t in dt.config["timeframes"]:
+                tfs[t["name"]] = Analyzer.since_until(str(s[0]), t["name"])
+            load.append({"i": s[0], "z": tfs})
+        return json.dumps(load)
+
     else:
         return 500
 
 
 @request_map("/action", method="GET")
 def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
-    c = fn.cur()
     if q == "install":
         global fetching, install_progress
         if fetching: return "already"
         fetching = True
         install_progress = 0
+        c = dt.cur(True)
         for k, v in fn.required_tables.items():
             c.execute("DROP TABLE IF EXISTS " + k)
             c.execute("CREATE TABLE " + k + " " + v)  # TRUNCATE TABLE x
+        dt.cur(False)
 
         # TABLE symbol
         fetch = list(tse.all_symbols())
@@ -285,8 +323,10 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             else:
                 inf = None
             sym.append((s, inf))
+        c = dt.cur(True)
         c.executemany("INSERT INTO symbol (name, info) VALUES (%s, %s)", sym)
         dt.connect.commit()
+        dt.cur(False)
         fetching = False
         return "symbols_done"
 
@@ -298,19 +338,23 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         return "started"
 
     elif q == "reset":
+        c = dt.cur(True)
         try:
             for rt in fn.required_tables.keys():
                 c.execute("DROP TABLE IF EXISTS " + rt)
         except:
             return "aborted"
+        dt.cur(False)
         return "done"
 
     elif q == "check":
+        c = dt.cur(True)
         c.execute("SELECT auto FROM symbol WHERE id='" + a1 + "' LIMIT 1")
         try:
             stat = c.fetchone()[0]  # int
         except IndexError:
             return "not found"
+        dt.cur(False)
         length = len(dt.config["timeframes"])
         binary = fn.auto_to_binary(stat, length)
         if a2 == "-1":
@@ -334,10 +378,12 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             b = JalaliDateTime(int(spl2[0]), int(spl2[1]), int(spl2[2]), int(tim2[0]), int(tim2[1]), 0)
         except:
             return "invalid date"
-        analyze.Analyzer.put_temp(a1, int(a2), a, b)
-        return "started"
+        Analyzer.put_temp(a1, int(a2), a, b)
+        return '<img src="./html/img/indicator_1.png" class="indicator">'
 
     elif q == "shutdown":
+        mt5.shutdown()
+        dt.connect.close()
         os.kill(os.getpid(), signal.SIGTERM)
 
     else:

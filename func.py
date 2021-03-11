@@ -1,6 +1,5 @@
 import pytse_client as tse
 import threading as th
-from typing import List
 
 import data as dt
 
@@ -9,10 +8,6 @@ required_tables = {  # NEVER USE 'desc' or 'group' AS TABLE NAME
               + "branch INT DEFAULT '-1', auto SMALLINT DEFAULT '0')",
     "branch": "(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(150))"
 }
-
-
-def cur():
-    return dt.connect.cursor()
 
 
 def sql_esc(msg):
@@ -57,19 +52,6 @@ def tf_name(tf: int):
         raise Exception("مقدار عددی تایم فریم را اشتباه وارد کرده اید!")
 
 
-def since_until(c, t):
-    c.execute("SELECT id, jala, time FROM " + t)
-    got: List[dict] = list()
-    for g in c: got.append({"id": g[0], "jala": g[1], "time": g[2]})
-    if len(got) == 0: return None
-    # return "..." if working.......
-    got = sorted(got, key=lambda k: k["time"])
-    got = sorted(got, key=lambda k: k["jala"])
-    first = got[0]
-    last = got[-1]
-    return "از " + first["jala"] + " - " + first["time"] + " تا " + last["jala"] + " - " + last["time"]
-
-
 def template(title: str, name: str, content: str = None) -> str:
     with open("./html/temp.html", "r", encoding="utf-8") as f:
         htm = f.read()
@@ -96,10 +78,11 @@ def header(title: str = "سام"):
 class Classify(th.Thread):
     def run(self):
         from controller import set_progress, set_classifying
-        c = cur()
+        c = dt.cur(True)
         c.execute("SELECT * FROM symbol")  # gives the same tuple you inserted.
         symbols = list()  # list of tuples
         for i in c: symbols.append(i)
+        dt.cur(False)
 
         sum_all = len(symbols)
 
@@ -112,6 +95,7 @@ class Classify(th.Thread):
             print(branch)
 
             # Check if it exists in 'branch'
+            c = dt.cur(True)
             c.execute("SELECT * FROM branch WHERE name='" + branch + "' LIMIT 1")
             exists = list()
             for i in c: exists.append(i)
@@ -125,5 +109,6 @@ class Classify(th.Thread):
             # Update symbol
             c.execute("UPDATE symbol SET branch='" + str(branch_id) + "' WHERE name='" + symbol_name + "'")
             dt.connect.commit()
+            dt.cur(False)
         set_classifying(False)
         set_progress(None)

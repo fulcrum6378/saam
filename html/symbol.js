@@ -79,8 +79,8 @@ function tfClick(v, sym, that) {
         context: document.body,
         timeout: 5000
     }).done(function(data) {
-        if (data != "started") alert(data);
-        else $(that).children().last().html('<img src="./html/img/indicator_1.png" class="indicator">');
+        if (!data.startsWith("<img")) alert(data);
+        else $(that).children().last().html(data);
     });
 }
 function z(d) {
@@ -90,3 +90,17 @@ function dateModel(cal) {
     let s = $("#dateSeparator").val(), t = $("#timeSeparator").val();
     return cal.Y+s+z(cal.M+1)+s+z(cal.D)+s+z(cal.H)+t+z(cal.I);
 }
+
+// Update Timeframes States
+setInterval(() => {
+    $.ajax({
+        url: "/query?q=branch_states&a1=" + $("#main").attr("data-branch"),
+        context: document.body,
+        timeout: 4900
+    }).done(function(data) {
+        var state = JSON.parse(data);
+        for (d in state)
+            for (let f in state[d]["z"])
+                $("#ovf_" + state[d]["i"] + " > ." + f + " > span").html(state[d]["z"][f]);
+    });
+}, 5000);
