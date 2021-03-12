@@ -83,6 +83,9 @@ class Analyzer(th.Thread):
                 data.append((int(r["time"]),
                              float(r["open"]), float(r["close"]),
                              float(r["high"]), float(r["low"]),
+                             int(r['tick_volume']),
+                             int(r['spread']),
+                             int(r['real_volume']),
                              greg.strftime("%Y.%m.%d"),
                              jala.strftime("%Y.%m.%d"),
                              greg.strftime("%H:%M")))
@@ -93,14 +96,16 @@ class Analyzer(th.Thread):
         c = dt.cur(True)
         c.execute("SHOW TABLES")
         if table not in fn.tables(c):
-            c.execute("CREATE TABLE " + table + " (id BIGINT NOT NULL UNIQUE, " +
+            c.execute("CREATE TABLE " + table + " (unix BIGINT NOT NULL UNIQUE, " +
                       "open FLOAT, close FLOAT, high FLOAT, low FLOAT, " +
+                      "tick_volume INT, spread INT, real_volume INT, " +
                       "greg VARCHAR(10), jala VARCHAR(10), time VARCHAR(5))")
         for d in data:
             try:
                 c.execute("INSERT INTO " + table
-                          + " (id, open, close, high, low, greg, jala, time) "
-                          + "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", d)
+                          + " (unix, open, close, high, low, tick_volume, spread, real_volume, "
+                          + "greg, jala, time) "
+                          + "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", d)
             except IntegrityError:
                 pass
         dt.connect.commit()
@@ -150,13 +155,12 @@ class Analyzer(th.Thread):
         dt.cur(False)
         if tName not in tbs: return "هیچ وقت"
         c = dt.cur(True)
-        c.execute("SELECT id, jala, time FROM " + tName)
+        c.execute("SELECT unix, jala, time FROM " + tName)
         got: List[dict] = list()
-        for g in c: got.append({"id": g[0], "jala": g[1], "time": g[2]})
+        for g in c: got.append({"unix": g[0], "jala": g[1], "time": g[2]})
         dt.cur(False)
         if len(got) == 0: return "هیچ وقت"
-        got = sorted(got, key=lambda k: k["time"])
-        got = sorted(got, key=lambda k: k["jala"])
+        got = sorted(got, key=lambda k: k["unix"])
         first = got[0]
         last = got[-1]
         return "از " + first["jala"] + " - " + first["time"] + " تا " + last["jala"] + " - " + last["time"]

@@ -173,7 +173,7 @@ def view(i: str):
     for t in tf:
         active = ''
         if t == tf[0]: active = ' show active'
-        data += '    <div class="tab-pane fade' + active + '" id="nav-' + t["name"] + '" ' \
+        data += '    <div class="tab-pane table-responsive fade' + active + '" id="nav-' + t["name"] + '" ' \
                 + 'role="tabpanel" aria-labelledby="nav-' + t["name"] + '-tab">\n'
         tName = str(i) + "_" + t["name"]
         c = dt.cur(True)
@@ -188,32 +188,39 @@ def view(i: str):
         data = data.replace('<span class="' + badge_classes + '">000</span>',
                             '<span class="' + badge_classes + '">' + length + '</span>', 1)
         if got is not None and len(got) > 0:
-            data += '        <div class="container">\n'
+            data += '        <table class="table table-dark">\n'  # table-striped
 
             # Table Head
-            rows = "8" if dt.config["showTimestamp"] else "7"
-            data += '            <div class="row row-cols-' + rows + '">\n'
+            data += '            <thead>\n'
+            data += '                <tr>\n'
             if dt.config["showTimestamp"]:
-                data += '               <div class="col">یونیکس</div>\n'
-            data += '               <div class="col">آغاز</div>\n'
-            data += '               <div class="col">اتمام</div>\n'
-            data += '               <div class="col">بالا</div>\n'
-            data += '               <div class="col">پایین</div>\n'
-            data += '               <div class="col">میلادی</div>\n'
-            data += '               <div class="col">جلالی</div>\n'
-            data += '               <div class="col">زمان</div>\n'
-            data += '            </div>\n'
+                data += '                   <th>یونیکس</th>\n'
+            data += '                   <th>آغاز</th>\n'
+            data += '                   <th>اتمام</th>\n'
+            data += '                   <th>بالا</th>\n'
+            data += '                   <th>پایین</th>\n'
+            data += '                   <th>حجم تیک</th>\n'
+            data += '                   <th>توسعه</th>\n'
+            data += '                   <th>حجم واقعی</th>\n'
+            data += '                   <th>میلادی</th>\n'
+            data += '                   <th>جلالی</th>\n'
+            data += '                   <th>زمان</th>\n'
+            data += '                </tr>\n'
+            data += '            </thead>\n'
 
             # Table Body
             got.sort(key=lambda k: k[0])
+            data += '            <tbody>\n'
             for r in got:
                 if not dt.config["showTimestamp"]:
                     r = r[1:]
-                data += '            <div class="row row-cols-' + str(len(r)) + '">\n'
+                data += '                <tr>\n'
                 for ii in r:  # DON'T USE "i"!!!
-                    data += '               <div class="col">' + str(ii) + '</div>\n'
-                data += '            </div>\n'
-            data += '        </div>\n'
+                    data += '                   <td data-bs-toggle="tooltip" data-bs-placement="top" ' \
+                            + 'data-bs-trigger="manual">' + str(ii) + '</td>\n'
+                data += '                </tr>\n'
+            data += '            </tbody>\n'
+            data += '        </table>\n'
         data += '    </div>\n'
     data += '</div>\n'
     data += '</center>\n'
