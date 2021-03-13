@@ -27,14 +27,17 @@ print("Initializing local server...")
 try:
     my_ip = ni.ifaddresses(ni.gateways()['default'][ni.AF_INET][1])[ni.AF_INET][0]['addr']
 except:
-    my_ip = "192.168.1.7"  # 127.0.0.1 later
+    my_ip = "192.168.1.9"  # 127.0.0.1 later
 
 print("\nhttp://" + str(my_ip) + ":1399/\n")
 try:
     server.scan("", "controller.py")
     server.start(host=my_ip, port=1399)
 except Exception as e:
-    print("ERROR STARTING SERVER: ", e)
+    if str(e) == "[WinError 10022] Windows Error 0x2726":
+        print("ERROR STARTING SERVER: ", "آی پی بدست آمده مخصوص دستگاه شما نیست!")
+    else:
+        print("ERROR STARTING SERVER: ", e)
 
 # Don't write any code down here, 'cause it won't work!
 # wine "/home/fulcrum/.wine/drive_c/users/fulcrum/Local Settings/Application Data/Programs/Python/Python38/python.exe"

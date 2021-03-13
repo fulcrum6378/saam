@@ -28,6 +28,8 @@ th, td {
 th {
     font-weight: 600;
     padding: 12px 0;
+    font-size: 14px;
+    font-family: sans-serif;
 }
 td {
     padding: 6px 0;

@@ -193,18 +193,10 @@ def view(i: str):
             # Table Head
             data += '            <thead>\n'
             data += '                <tr>\n'
-            if dt.config["showTimestamp"]:
-                data += '                   <th>یونیکس</th>\n'
-            data += '                   <th>آغاز</th>\n'
-            data += '                   <th>اتمام</th>\n'
-            data += '                   <th>بالا</th>\n'
-            data += '                   <th>پایین</th>\n'
-            data += '                   <th>حجم تیک</th>\n'
-            data += '                   <th>توسعه</th>\n'
-            data += '                   <th>حجم واقعی</th>\n'
-            data += '                   <th>میلادی</th>\n'
-            data += '                   <th>جلالی</th>\n'
-            data += '                   <th>زمان</th>\n'
+            arr = dt.config["viewingColumnNames"]
+            for col in range(len(arr)):
+                if col == 0 and not dt.config["showTimestamp"]: continue
+                data += '                   <th>' + str(arr[col]) + '</th>\n'
             data += '                </tr>\n'
             data += '            </thead>\n'
 
