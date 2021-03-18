@@ -21,13 +21,13 @@ class Analyzer(th.Thread):
 
     def run(self):
         while self.active:
-            temp = os.listdir("./temp/")
+            temp = os.listdir(dt.path + "temp/")
             if temp: Analyzer.process(temp[0])
             time.sleep(5)
 
     @staticmethod
     def read_temp(path) -> dict:
-        with open("./temp/" + path, "r") as f:
+        with open(dt.path + "temp/" + path, "r") as f:
             data = None
             try:
                 data = json.loads(f.read())
@@ -38,7 +38,7 @@ class Analyzer(th.Thread):
 
     @staticmethod
     def save_temp(path, data) -> None:
-        with open("./temp/" + path, "w") as f:
+        with open(dt.path + "temp/" + path, "w") as f:
             f.write(json.dumps(data))
             f.close()
 
@@ -125,17 +125,17 @@ class Analyzer(th.Thread):
         new_name = 0
         while str(new_name) + ".json" in each:
             new_name += 1
-        with open("./temp/" + str(new_name) + ".json", "w") as f:
+        with open(dt.path + "temp/" + str(new_name) + ".json", "w") as f:
             f.write(json.dumps(temp))
             f.close()
 
     @staticmethod
     def annihilate(path):
-        os.remove("./temp/" + path)
+        os.remove(dt.path + "temp/" + path)
 
     @staticmethod
     def is_in_temp(sym, tfr) -> bool:
-        temp = os.listdir("./temp/")
+        temp = os.listdir(dt.path + "temp/")
         ret = False
         for f in temp:
             data = Analyzer.read_temp(f)

@@ -1,8 +1,11 @@
 {
+  "mofid_path": "C:/Program Files/MofidTrader/terminal.exe",
+  "mofid_login": 2673545,
+  "mofid_pass": "ms7leepc",
   "mysql_host": "localhost",
-  "mysql_user": "fulcrum",
+  "mysql_user": "root",
   "mysql_pass": "54321",
-  "mysql_db": "karimi",
+  "mysql_db": "saam",
   "timezone": "Asia/Tehran",
   "timeframes": [
     {"value": 1, "name": "M1", "visName": "M1"},

@@ -14,8 +14,9 @@ import analyze
 
 # noinspection PyGlobalUndefined
 def get_config():
-    global config, zone
-    with open("./config.json", "r", encoding="utf-8") as f:
+    global path, config, zone
+    path = "E:/Saam/"
+    with open(path + "config.json" , "r", encoding="utf-8") as f:
         config = json.loads(f.read())
         f.close()
     zone = timezone(config["timezone"])
