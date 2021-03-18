@@ -10,13 +10,14 @@ import pymysql as mysql  # mysql.connector
 from pytz import timezone
 
 import analyze
+import watch
 
 
 # noinspection PyGlobalUndefined
 def get_config():
     global path, config, zone
     path = "E:/Saam/"
-    with open(path + "config.json" , "r", encoding="utf-8") as f:
+    with open(path + "config.json", "r", encoding="utf-8") as f:
         config = json.loads(f.read())
         f.close()
     zone = timezone(config["timezone"])
@@ -57,3 +58,9 @@ def init_analyzer():
     global analyzer
     analyzer = analyze.Analyzer()
     analyzer.start()
+
+
+def init_watcher():
+    global watcher
+    watcher = watch.Watcher()
+    watcher.start()

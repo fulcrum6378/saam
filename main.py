@@ -22,6 +22,7 @@ if not data.connect:
 print("DONE!")
 
 data.init_analyzer()
+data.init_watcher()
 
 print("Initializing local server...")
 try:

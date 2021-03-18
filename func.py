@@ -1,12 +1,12 @@
-import pytse_client as tse
-import threading as th
-
 import data as dt
 
 required_tables = {  # NEVER USE 'desc' or 'group' AS TABLE NAME
-    "symbol": "(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(75), info VARCHAR(200) DEFAULT NULL, "
+    "symbol": "(id INT AUTO_INCREMENT PRIMARY KEY, "
+              + "name VARCHAR(75) CHARACTER SET utf8 COLLATE utf8_unicode_ci, "
+              + "info VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL, "
               + "branch INT DEFAULT '-1', auto SMALLINT DEFAULT '0')",
-    "branch": "(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(150))"
+    "branch": "(id INT AUTO_INCREMENT PRIMARY KEY, "
+              + "name VARCHAR(150) CHARACTER SET utf8 COLLATE utf8_unicode_ci)"
 }
 
 
@@ -73,42 +73,3 @@ def header(title: str = "سام"):
         f.close()
     htm = htm.replace('{title}', title)
     return htm
-
-
-class Classify(th.Thread):
-    def run(self):
-        from controller import set_progress, set_classifying
-        c = dt.cur(True)
-        c.execute("SELECT * FROM symbol")  # gives the same tuple you inserted.
-        symbols = list()  # list of tuples
-        for i in c: symbols.append(i)
-        dt.cur(False)
-
-        sum_all = len(symbols)
-
-        for s in range(sum_all):
-            set_progress(s, sum_all)
-
-            # Find branch
-            symbol_name = symbols[s][1]
-            branch = tse.Ticker(symbol_name).group_name  # fun.sql_esc()
-            print(branch)
-
-            # Check if it exists in 'branch'
-            c = dt.cur(True)
-            c.execute("SELECT * FROM branch WHERE name='" + branch + "' LIMIT 1")
-            exists = list()
-            for i in c: exists.append(i)
-            if len(exists) == 0:
-                c.execute("INSERT INTO branch (name) VALUES (%s)", branch)
-                dt.connect.commit()
-                branch_id = c.lastrowid
-            else:
-                branch_id = exists[0][0]
-
-            # Update symbol
-            c.execute("UPDATE symbol SET branch='" + str(branch_id) + "' WHERE name='" + symbol_name + "'")
-            dt.connect.commit()
-            dt.cur(False)
-        set_classifying(False)
-        set_progress(None)

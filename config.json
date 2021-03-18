@@ -25,5 +25,6 @@
     "Timestamp", "Open", "Close", "High", "Low",
     "Tick Volume", "Spread", "Real Volume",
     "Gregory", "Jalali", "Time"
-  ]
+  ],
+  "minimumRowInRequiredTables": 1
 }

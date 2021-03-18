@@ -9,13 +9,15 @@ import signal
 from simple_http_server import request_map, PathValue, Headers, StaticFile
 
 from analyze import Analyzer
+from classify import Classify
 import data as dt
 import func as fn
 
 
 @request_map("/")
 def index():
-    if install_progress is not None:
+    global classifier
+    if classifier is not None and classifier.active:
         status = "installing"
     else:
         c = dt.cur(True)
@@ -26,6 +28,18 @@ def index():
         for k, v in fn.required_tables.items():
             if k not in tables:
                 all_set = False
+            else:
+                c = dt.cur(True)
+                c.execute("SELECT id FROM " + k)
+                rowCount = len(list(c))
+                fuck_all = False
+                if rowCount <= dt.config["minimumRowInRequiredTables"]:
+                    for kk in fn.required_tables.keys():
+                        c.execute("DROP TABLE IF EXISTS " + kk)
+                    all_set = False
+                    fuck_all = True
+                dt.cur(False)
+                if fuck_all: break
         if all_set:
             status = "yes"
         else:
@@ -288,7 +302,13 @@ def favicon():
 @request_map("/query", method="GET")
 def query(q: str, a1: str = "", a2: str = "", a3: str = ""):
     if q == "install_progress":
-        return str(install_progress)
+        global classifier
+        if classifier is not None and classifier.active:
+            return str(classifier.install_progress)
+        elif fetching:
+            return str(0)
+        else:
+            return str(None)
 
     elif q == "branch_states":
         c = dt.cur(True)
@@ -310,10 +330,9 @@ def query(q: str, a1: str = "", a2: str = "", a3: str = ""):
 @request_map("/action", method="GET")
 def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
     if q == "install":
-        global fetching, install_progress
+        global fetching
         if fetching: return "already"
         fetching = True
-        install_progress = 0
         c = dt.cur(True)
         for k, v in fn.required_tables.items():
             c.execute("DROP TABLE IF EXISTS " + k)
@@ -339,10 +358,10 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         return "symbols_done"
 
     elif q == "classify":
-        global classifying
-        if classifying: return "already"
-        classifying = True
-        fn.Classify().start()
+        global classifier
+        if classifier is not None and classifier.active: return "already"
+        classifier = Classify()
+        classifier.start()
         return "started"
 
     elif q == "reset":
@@ -399,18 +418,4 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
 
 
 fetching = False
-classifying = False
-install_progress = None
-
-
-def set_progress(a, b=None):  # never change global statements inside a loop
-    global install_progress
-    if a is not None:
-        install_progress = (100 / b) * a
-    else:
-        install_progress = None
-
-
-def set_classifying(b):
-    global classifying
-    classifying = b
+classifier = None

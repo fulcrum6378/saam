@@ -6,7 +6,7 @@ import os
 from persiantools.jdatetime import JalaliDateTime
 from pymysql.err import IntegrityError
 from pytz import utc
-import threading as th
+from threading import Thread
 import time
 from typing import List
 
@@ -14,16 +14,16 @@ import data as dt
 import func as fn
 
 
-class Analyzer(th.Thread):
+class Analyzer(Thread):
     def __init__(self):
-        th.Thread.__init__(self)
+        Thread.__init__(self)
         self.active = True
 
     def run(self):
         while self.active:
             temp = os.listdir(dt.path + "temp/")
             if temp: Analyzer.process(temp[0])
-            time.sleep(5)
+            if len(temp) == 1: time.sleep(10)
 
     @staticmethod
     def read_temp(path) -> dict:
