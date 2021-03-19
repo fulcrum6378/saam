@@ -37,6 +37,6 @@ try:
     server.start(host=my_ip, port=1399)
 except Exception as e:
     if str(e) == "[WinError 10022] Windows Error 0x2726":
-        print("ERROR STARTING SERVER: ", "آی پی بدست آمده مخصوص دستگاه شما نیست!")
+        print("ERROR STARTING SERVER: ", my_ip + " IS NOT YOUR DEVICE'S IP ADDRESS!")
     else:
         print("ERROR STARTING SERVER: ", e)
