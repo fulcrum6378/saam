@@ -3,7 +3,7 @@ import json
 from json.decoder import JSONDecodeError
 import MetaTrader5 as mt5
 import os
-from persiantools.jdatetime import JalaliDateTime
+from datetime import datetime
 from pymysql.err import IntegrityError
 from pytz import utc
 from threading import Thread
@@ -23,7 +23,7 @@ class Analyzer(Thread):
         while self.active:
             temp = os.listdir(dt.path + "temp/")
             if temp: Analyzer.process(temp[0])
-            if len(temp) == 1: time.sleep(10)
+            if len(temp) == 1: time.sleep(15)
 
     @staticmethod
     def read_temp(path) -> dict:
@@ -114,9 +114,7 @@ class Analyzer(Thread):
         print(err_begin, "DONE")
 
     @staticmethod
-    def put_temp(sym: str, timeframe: int, a: JalaliDateTime, b: JalaliDateTime):
-        a = a.to_gregorian()
-        b = b.to_gregorian()
+    def put_temp(sym: str, timeframe: int, a: datetime, b: datetime):
         temp = {"sym": sym, "timeframe": timeframe,
                 "start": datetime(a.year, a.month, a.day, a.hour, a.minute, tzinfo=dt.zone).timestamp(),
                 "end": datetime(b.year, b.month, b.day, b.hour, b.minute, tzinfo=dt.zone).timestamp(),

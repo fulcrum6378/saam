@@ -381,7 +381,6 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             stat = c.fetchone()[0]  # int
         except IndexError:
             return "not found"
-        dt.cur(False)
         length = len(dt.config["timeframes"])
         binary = fn.auto_to_binary(stat, length)
         if a2 == "-1":
@@ -392,6 +391,7 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             binary = "".join(binary)
         c.execute("UPDATE symbol SET auto = '" + str(int(binary, 2)) + "' WHERE id='" + a1 + "'")
         dt.connect.commit()
+        dt.cur(False)
         return binary
 
     elif q == "analyze":
@@ -405,7 +405,7 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             b = JalaliDateTime(int(spl2[0]), int(spl2[1]), int(spl2[2]), int(tim2[0]), int(tim2[1]), 0)
         except:
             return "invalid date"
-        Analyzer.put_temp(a1, int(a2), a, b)
+        Analyzer.put_temp(a1, int(a2), a.to_gregorian(), b.to_gregorian())
         return '<img src="./html/img/indicator_1.png" class="indicator">'
 
     elif q == "shutdown":
