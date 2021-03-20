@@ -116,7 +116,7 @@ def branch(i: str, found: str = None):
         for t in dt.config["timeframes"]:
             tfs[t["name"]] = Analyzer.since_until(str(s[0]), t["name"])
         load.append({"i": s[0], "n": s[1], "f": s[2], "z": tfs,
-                     "a": fn.auto_to_binary(s[3], len(dt.config["timeframes"]))})
+                     "a": fn.auto_to_binary(s[3])})
     load.sort(key=lambda k: k["n"])
     tf = dt.config["timeframes"]
     for s in load:
@@ -381,10 +381,9 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             stat = c.fetchone()[0]  # int
         except IndexError:
             return "not found"
-        length = len(dt.config["timeframes"])
-        binary = fn.auto_to_binary(stat, length)
+        binary = fn.auto_to_binary(stat)
         if a2 == "-1":
-            binary = "".join([a3 for _ in range(length)])
+            binary = "".join([a3 for _ in range(len(dt.config["timeframes"]))])
         else:
             binary = list(binary)
             binary[int(a2)] = a3

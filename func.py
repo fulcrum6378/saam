@@ -26,7 +26,7 @@ def tables(c):
     return tbs
 
 
-def auto_to_binary(stat: int, length: int) -> str:
+def auto_to_binary(stat: int, length: int = len(dt.config["timeframes"])) -> str:
     initial = bin(stat)[2:]  # bin() -> str
     pre = ""
     dist = length - len(initial)
