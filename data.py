@@ -9,9 +9,6 @@ except ImportError:
 import pymysql as mysql  # mysql.connector
 from pytz import timezone
 
-import analyze
-import watch
-
 
 # noinspection PyGlobalUndefined
 def get_config():
@@ -54,13 +51,13 @@ def cur(b):
         del c
 
 
-def init_analyzer():
+def init_analyzer(thread):
     global analyzer
-    analyzer = analyze.Analyzer()
+    analyzer = thread
     analyzer.start()
 
 
-def init_watcher():
+def init_watcher(thread):
     global watcher
-    watcher = watch.Watcher()
+    watcher = thread
     watcher.start()

@@ -4,7 +4,8 @@ from json.decoder import JSONDecodeError
 import MetaTrader5 as mt5
 import os
 from datetime import datetime
-from pymysql.err import IntegrityError
+from persiantools.jdatetime import JalaliDateTime
+from pymysql.err import IntegrityError, OperationalError
 from pytz import utc
 from threading import Thread
 import time
@@ -62,7 +63,7 @@ class Analyzer(Thread):
             print(err_begin, "Could not find this symbol in the database!!!")
             return
         found = found[0]
-        table = str(data["sym"]) + "_" + fn.tf_name(data["timeframe"])
+        table = (str(data["sym"]) + "_" + fn.tf_name(data["timeframe"])).lower()
         rates = mt5.copy_rates_range(found, data["timeframe"],
                                      datetime.fromtimestamp(data["start"], tz=utc),
                                      datetime.fromtimestamp(data["end"], tz=utc))
@@ -96,10 +97,13 @@ class Analyzer(Thread):
         c = dt.cur(True)
         c.execute("SHOW TABLES")
         if table not in fn.tables(c):
-            c.execute("CREATE TABLE " + table + " (unix BIGINT NOT NULL UNIQUE, " +
-                      "open FLOAT, close FLOAT, high FLOAT, low FLOAT, " +
-                      "tick_volume INT, spread INT, real_volume INT, " +
-                      "greg VARCHAR(10), jala VARCHAR(10), time VARCHAR(5))")
+            try:
+                c.execute("CREATE TABLE " + table + " (unix BIGINT NOT NULL UNIQUE, " +
+                          "open FLOAT, close FLOAT, high FLOAT, low FLOAT, " +
+                          "tick_volume INT, spread INT, real_volume BIGINT, " +
+                          "greg VARCHAR(10), jala VARCHAR(10), time VARCHAR(5))")
+            except OperationalError:
+                pass  # already exists
         for d in data:
             try:
                 c.execute("INSERT INTO " + table
@@ -137,16 +141,16 @@ class Analyzer(Thread):
         ret = False
         for f in temp:
             data = Analyzer.read_temp(f)
-            if data is not None:
-                if data["sym"] == sym and data["timeframe"] == tfr:
-                    ret = True
+            if data is None: continue
+            if data["sym"] == sym and data["timeframe"] == tfr:
+                ret = True
         return ret
 
     @staticmethod
-    def since_until(sym, tfr) -> str:
-        if Analyzer.is_in_temp(sym, tfr):
+    def since_until(sym, tfrName, tfrValue) -> str:
+        if Analyzer.is_in_temp(sym, tfrValue):
             return '<img src="./html/img/indicator_1.png" class="indicator">'
-        tName = sym + "_" + tfr
+        tName = (sym + "_" + tfrName).lower()
         c = dt.cur(True)
         c.execute("SHOW TABLES")
         tbs = fn.tables(c)

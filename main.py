@@ -21,12 +21,18 @@ if not data.connect:
     quit()
 print("DONE!")
 
-data.init_analyzer()
-data.init_watcher()
+import analyze
+import watch
+
+print("Initializing background threads...")
+data.init_analyzer(analyze.Analyzer())
+data.init_watcher(watch.Watcher())
+print("DONE")
 
 print("Initializing local server...")
 try:
     import netifaces as ni
+
     my_ip = ni.ifaddresses(ni.gateways()['default'][ni.AF_INET][1])[ni.AF_INET][0]['addr']
 except:
     my_ip = "192.168.1.8"  # 127.0.0.1

@@ -114,7 +114,7 @@ def branch(i: str, found: str = None):
     for s in got:
         tfs = dict()
         for t in dt.config["timeframes"]:
-            tfs[t["name"]] = Analyzer.since_until(str(s[0]), t["name"])
+            tfs[t["name"]] = Analyzer.since_until(str(s[0]), t["name"], t["value"])
         load.append({"i": s[0], "n": s[1], "f": s[2], "z": tfs,
                      "a": fn.auto_to_binary(s[3])})
     load.sort(key=lambda k: k["n"])
@@ -319,7 +319,7 @@ def query(q: str, a1: str = "", a2: str = "", a3: str = ""):
         for s in got:
             tfs = dict()
             for t in dt.config["timeframes"]:
-                tfs[t["name"]] = Analyzer.since_until(str(s[0]), t["name"])
+                tfs[t["name"]] = Analyzer.since_until(str(s[0]), t["name"], t["value"])
             load.append({"i": s[0], "z": tfs})
         return json.dumps(load)
 
