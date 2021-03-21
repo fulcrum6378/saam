@@ -27,11 +27,16 @@ function dateModel(cal) {
     return cal.Y+s+z(cal.M+1)+s+z(cal.D)+s+z(cal.H)+t+z(cal.I);
 }
 function omit() {
-    let cal = new SolarHijri(new Date()), def = dateModel(cal) +" - "+ dateModel(cal);
-    let board = prompt("لطفا بازه زمانی موردنظر را انتخاب کنید...", def);
+    let cal = new SolarHijri(new Date()),
+        def = dateModel(cal) +" - "+ dateModel(cal),
+        sym = $("#main").attr("data-symbol"),
+        tfr = $("#main nav .active").index(),
+        tfrName = $("#main nav .active")[0].innerHTML.split("<span")[0].replaceAll("&nbsp;", "");
+    let board = prompt("لطفا بازه زمانی موردنظر برای از قلم انداختن شمع های تایم فریم '" + tfrName
+        + "' را انتخاب کنید...", def);
     if (board == null || board == "") return;
     $.ajax({
-        url: "/action?q=delete&a1=",
+        url: "/action?q=delete&a1=" + sym + "&a2=" + tfr + "&a3=" board,
         context: document.body,
         timeout: 5000
     }).done(function(data) {
@@ -39,10 +44,12 @@ function omit() {
     });
 }
 function truncate() {
-    if (!confirm("آیا از خالی کردن تمام اطلاعات موجود برای تایم فریم " + 1 + " مطمئن هستید؟")) return;
-    alert("");
+    let sym = $("#main").attr("data-symbol"),
+        tfr = $("#main nav .active").index(),
+        tfrName = $("#main nav .active")[0].innerHTML.split("<span")[0].replaceAll("&nbsp;", "");
+    if (!confirm("آیا از خالی کردن تمام اطلاعات موجود برای تایم فریم '" + tfrName + "' مطمئن هستید؟")) return;
     $.ajax({
-        url: "/action?q=delete&a1=",
+        url: "/action?q=delete&a1=" + sym + "&a2=" + tfr,
         context: document.body,
         timeout: 5000
     }).done(function(data) {
@@ -50,10 +57,11 @@ function truncate() {
     });
 }
 function destroy() {
-    if (!confirm("آیا از خالی کردن تمام اطلاعات موجود برای نماد " + 1 + " مطمئن هستید؟")) return;
-    alert("");
+    let sym = $("#main").attr("data-symbol"),
+        symName = $("#header h3")[0].innerHTML;
+    if (!confirm("آیا از خالی کردن تمام اطلاعات موجود برای نماد '" + symName + "' مطمئن هستید؟")) return;
     $.ajax({
-        url: "/action?q=delete&a1=",
+        url: "/action?q=delete&a1=" + sym,
         context: document.body,
         timeout: 5000
     }).done(function(data) {

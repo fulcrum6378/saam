@@ -169,14 +169,14 @@ def view(i: str):
     name = name[0]
     data = "<body>\n"
     data += '<img src="./html/img/settings_1.png" class="fixedIcon" id="settings" ' \
-            + 'data-bs-toggle="dropdown" aria-expanded="false">'
+            + 'data-bs-toggle="dropdown" aria-expanded="false">\n'
     data += '<ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="settings">\n' \
             + '    <li class="dropdown-item" onclick="omit();">حذف براساس زمان</li>\n' \
             + '    <li class="dropdown-item" onclick="truncate();">حذف براساس تایم فریم</li>\n' \
             + '    <li class="dropdown-item" onclick="destroy();">حذف همه</li>\n' \
             + '</ul>\n'
     data += fn.header(name)
-    data += '<center id="main">\n'
+    data += '<center id="main" data-symbol="' + i + '">\n'
     tf = dt.config["timeframes"]
     data += '<nav>\n    <div class="nav nav-tabs flex-column flex-sm-row" id="nav-tab" role="tablist">\n'
     badge_classes = 'badge bg-light text-dark'
@@ -404,21 +404,24 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         return binary
 
     elif q == "analyze":
-        try:
-            got = a3.split(" - ")
-            spl1 = got[0].split(dt.config["dateSeparator"])
-            spl2 = got[1].split(dt.config["dateSeparator"])
-            tim1 = spl1[3].split(dt.config["timeSeparator"])
-            tim2 = spl2[3].split(dt.config["timeSeparator"])
-            a = JalaliDateTime(int(spl1[0]), int(spl1[1]), int(spl1[2]), int(tim1[0]), int(tim1[1]), 0)
-            b = JalaliDateTime(int(spl2[0]), int(spl2[1]), int(spl2[2]), int(tim2[0]), int(tim2[1]), 0)
-        except:
-            return "invalid date"
+        ret = fn.persian_board(a3)
+        if ret is None: return "invalid date"
+        a = ret[0]
+        b = ret[1]
         Analyzer.put_temp(a1, int(a2), a.to_gregorian(), b.to_gregorian())
         return '<img src="./html/img/indicator_1.png" class="indicator">'
 
     elif q == "delete":
-        pass
+        if a3 != "":
+            ret = fn.persian_board(a3)
+            if ret is None: return "invalid date"
+            a = ret[0]
+            b = ret[1]
+        # a1 => symId
+        # a2 => tfrIndex
+        # a3 => board
+        Analyzer.put_temp(a1, int(a2), a.to_gregorian(), b.to_gregorian())
+        return "saved"
 
     elif q == "shutdown":
         mt5.shutdown()

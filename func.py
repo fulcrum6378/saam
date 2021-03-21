@@ -73,3 +73,18 @@ def header(title: str = "سام"):
         f.close()
     htm = htm.replace('{title}', title)
     return htm
+
+
+def persian_board(board: str):
+    try:
+        got = board.split(" - ")
+        spl1 = got[0].split(dt.config["dateSeparator"])
+        spl2 = got[1].split(dt.config["dateSeparator"])
+        tim1 = spl1[3].split(dt.config["timeSeparator"])
+        tim2 = spl2[3].split(dt.config["timeSeparator"])
+        a = JalaliDateTime(int(spl1[0]), int(spl1[1]), int(spl1[2]), int(tim1[0]), int(tim1[1]), 0)
+        b = JalaliDateTime(int(spl2[0]), int(spl2[1]), int(spl2[2]), int(tim2[0]), int(tim2[1]), 0)
+    except:
+        return None
+    else:
+        return a, b
