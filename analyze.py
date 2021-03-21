@@ -54,6 +54,10 @@ class Analyzer(Thread):
             return
         data["state"] = 1
         Analyzer.save_temp(path, data)
+        if data["timeframe"] is not None:
+            table = (str(data["sym"]) + "_" + fn.tf_name(data["timeframe"])).lower()
+        else:
+            table = None
         if data["action"] == "insert":
             c = dt.cur(True)
             c.execute("SELECT name FROM symbol WHERE id='" + str(data["sym"]) + "' LIMIT 1")
@@ -64,7 +68,6 @@ class Analyzer(Thread):
                 print(err_begin, "Could not find this symbol in the database!!!")
                 return
             found = found[0]
-            table = (str(data["sym"]) + "_" + fn.tf_name(data["timeframe"])).lower()
             rates = mt5.copy_rates_range(found, data["timeframe"],
                                          datetime.fromtimestamp(data["start"], tz=utc),
                                          datetime.fromtimestamp(data["end"], tz=utc))
@@ -116,9 +119,28 @@ class Analyzer(Thread):
             dt.connect.commit()
             dt.cur(False)
 
-        elif data["action"] == "remove":
-            pass  # ....
-
+        elif data["action"] == "delete":
+            c = dt.cur(True)
+            c.execute("SHOW TABLES")
+            tables = fn.tables(c)
+            if data["start"] is not None and data["end"] is not None:
+                c.execute("SHOW TABLES")
+                if table in tables:
+                    c.execute("DELETE FROM " + table + " WHERE unix BETWEEN " + str(data["start"])
+                              + " AND " + str(data["end"]))
+                else:
+                    dt.cur(False)
+                    raise fn.SaamError("Such table does not exist!")
+            elif data["timeframe"] is not None:
+                if table in tables:
+                    c.execute("TRUNCATE TABLE " + table)
+                else:
+                    dt.cur(False)
+                    raise fn.SaamError("Such table does not exist!")
+            else:
+                for tfr in dt.config["timeframes"]:
+                    c.execute("DROP TABLE IF EXISTS " + (str(data["sym"]) + "_" + tfr["name"]).lower())
+            dt.cur(False)
         Analyzer.annihilate(path)
         print(err_begin, "DONE")
 

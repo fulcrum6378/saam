@@ -101,7 +101,7 @@ def branch(i: str, found: str = None):
     name = c.fetchone()
     dt.cur(False)
     if len(name) == 0:
-        raise Exception("گروه موردنظر در پایگاه داده یافت نشد!")
+        raise fn.SaamError("گروه موردنظر در پایگاه داده یافت نشد!")
     name = name[0]
     data = "<body>\n"
     data += fn.header(name)
@@ -164,8 +164,8 @@ def view(i: str):
     name = c.fetchone()
     dt.cur(False)
     if len(name) == 0:
-        raise Exception("نماد موردنظر در پایگاه داده یافت نشد!"
-                        + " در این مواقع بهتر است «نصب و راه اندازی مجدد» را انجام دهید.")
+        raise fn.SaamError("نماد موردنظر در پایگاه داده یافت نشد!"
+                           + " در این مواقع بهتر است «نصب و راه اندازی مجدد» را انجام دهید.")
     name = name[0]
     data = "<body>\n"
     data += '<img src="./html/img/settings_1.png" class="fixedIcon" id="settings" ' \
@@ -408,19 +408,19 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         if ret is None: return "invalid date"
         a = ret[0]
         b = ret[1]
-        Analyzer.put_temp(a1, int(a2), a.to_gregorian(), b.to_gregorian())
+        Analyzer.put_temp(a1, int(a2), a, b)
         return '<img src="./html/img/indicator_1.png" class="indicator">'
 
     elif q == "delete":
+        a = b = tfr = None
+        if a2 != "":
+            tfr = dt.config["timeframes"][int(a2)]["value"]
         if a3 != "":
             ret = fn.persian_board(a3)
             if ret is None: return "invalid date"
             a = ret[0]
             b = ret[1]
-        # a1 => symId
-        # a2 => tfrIndex
-        # a3 => board
-        Analyzer.put_temp(a1, int(a2), a.to_gregorian(), b.to_gregorian())
+        Analyzer.put_temp(a1, tfr, a, b, "delete")
         return "saved"
 
     elif q == "shutdown":

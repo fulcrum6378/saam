@@ -1,3 +1,5 @@
+from persiantools.jdatetime import JalaliDateTime
+
 import data as dt
 
 required_tables = {  # NEVER USE 'desc' or 'group' AS TABLE NAME
@@ -84,7 +86,15 @@ def persian_board(board: str):
         tim2 = spl2[3].split(dt.config["timeSeparator"])
         a = JalaliDateTime(int(spl1[0]), int(spl1[1]), int(spl1[2]), int(tim1[0]), int(tim1[1]), 0)
         b = JalaliDateTime(int(spl2[0]), int(spl2[1]), int(spl2[2]), int(tim2[0]), int(tim2[1]), 0)
+        a = a.to_gregorian()
+        b = b.to_gregorian()
     except:
         return None
     else:
         return a, b
+
+
+class SaamError(Exception):
+    def __init__(self, message, errors=None):
+        super(ValidationError, self).__init__(message)
+        self.errors = errors

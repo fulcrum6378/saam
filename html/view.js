@@ -36,11 +36,12 @@ function omit() {
         + "' را انتخاب کنید...", def);
     if (board == null || board == "") return;
     $.ajax({
-        url: "/action?q=delete&a1=" + sym + "&a2=" + tfr + "&a3=" board,
+        url: "/action?q=delete&a1=" + sym + "&a2=" + tfr + "&a3=" + board,
         context: document.body,
         timeout: 5000
     }).done(function(data) {
-        //
+        if (data == "invalid date") alert("بازه زمانی را اشتباه وارد کردید!");
+        if (data == "saved") alert("درخواستی که دادید چند لحظه دیگر اجرا خواهد شد...");
     });
 }
 function truncate() {
@@ -53,7 +54,7 @@ function truncate() {
         context: document.body,
         timeout: 5000
     }).done(function(data) {
-        //
+        if (data == "saved") alert("درخواستی که دادید چند لحظه دیگر اجرا خواهد شد...");
     });
 }
 function destroy() {
@@ -65,6 +66,6 @@ function destroy() {
         context: document.body,
         timeout: 5000
     }).done(function(data) {
-        //
+        if (data == "saved") alert("درخواستی که دادید چند لحظه دیگر اجرا خواهد شد...");
     });
 }
