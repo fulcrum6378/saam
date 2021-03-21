@@ -54,75 +54,82 @@ class Analyzer(Thread):
             return
         data["state"] = 1
         Analyzer.save_temp(path, data)
-        c = dt.cur(True)
-        c.execute("SELECT name FROM symbol WHERE id='" + str(data["sym"]) + "' LIMIT 1")
-        found = c.fetchone()
-        dt.cur(False)
-        if len(found) == 0:
-            Analyzer.annihilate(path)
-            print(err_begin, "Could not find this symbol in the database!!!")
-            return
-        found = found[0]
-        table = (str(data["sym"]) + "_" + fn.tf_name(data["timeframe"])).lower()
-        rates = mt5.copy_rates_range(found, data["timeframe"],
-                                     datetime.fromtimestamp(data["start"], tz=utc),
-                                     datetime.fromtimestamp(data["end"], tz=utc))
-        if rates is None:
-            Analyzer.annihilate(path)
-            try:
-                print(err_begin, str(mt5.last_error()))
-            except:
-                print(err_begin, "UNKNOWN ERROR!")
-            return
-        if len(rates) > 0:
-            data: List[tuple] = list()
-            for r in rates:
-                # time, open, high, close, tick_volume, spread, real_volume
-                unix = int(r["time"])
-                greg = datetime.fromtimestamp(unix, tz=utc)
-                jala = JalaliDateTime.fromtimestamp(unix, tz=utc)
-                data.append((int(r["time"]),
-                             float(r["open"]), float(r["close"]),
-                             float(r["high"]), float(r["low"]),
-                             int(r['tick_volume']),
-                             int(r['spread']),
-                             int(r['real_volume']),
-                             greg.strftime("%Y.%m.%d"),
-                             jala.strftime("%Y.%m.%d"),
-                             greg.strftime("%H:%M")))
-        else:
-            Analyzer.annihilate(path)
-            print(err_begin, "No candles were found!")
-            return
-        c = dt.cur(True)
-        c.execute("SHOW TABLES")
-        if table not in fn.tables(c):
-            try:
-                c.execute("CREATE TABLE " + table + " (unix BIGINT NOT NULL UNIQUE, " +
-                          "open FLOAT, close FLOAT, high FLOAT, low FLOAT, " +
-                          "tick_volume INT, spread INT, real_volume BIGINT, " +
-                          "greg VARCHAR(10), jala VARCHAR(10), time VARCHAR(5))")
-            except OperationalError:
-                pass  # already exists
-        for d in data:
-            try:
-                c.execute("INSERT INTO " + table
-                          + " (unix, open, close, high, low, tick_volume, spread, real_volume, "
-                          + "greg, jala, time) "
-                          + "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", d)
-            except IntegrityError:
-                pass
-        dt.connect.commit()
-        dt.cur(False)
+        if data["action"] == "insert":
+            c = dt.cur(True)
+            c.execute("SELECT name FROM symbol WHERE id='" + str(data["sym"]) + "' LIMIT 1")
+            found = c.fetchone()
+            dt.cur(False)
+            if len(found) == 0:
+                Analyzer.annihilate(path)
+                print(err_begin, "Could not find this symbol in the database!!!")
+                return
+            found = found[0]
+            table = (str(data["sym"]) + "_" + fn.tf_name(data["timeframe"])).lower()
+            rates = mt5.copy_rates_range(found, data["timeframe"],
+                                         datetime.fromtimestamp(data["start"], tz=utc),
+                                         datetime.fromtimestamp(data["end"], tz=utc))
+            if rates is None:
+                Analyzer.annihilate(path)
+                try:
+                    print(err_begin, str(mt5.last_error()))
+                except:
+                    print(err_begin, "UNKNOWN ERROR!")
+                return
+            if len(rates) > 0:
+                data: List[tuple] = list()
+                for r in rates:
+                    # time, open, high, close, tick_volume, spread, real_volume
+                    unix = int(r["time"])
+                    greg = datetime.fromtimestamp(unix, tz=utc)
+                    jala = JalaliDateTime.fromtimestamp(unix, tz=utc)
+                    data.append((int(r["time"]),
+                                 float(r["open"]), float(r["close"]),
+                                 float(r["high"]), float(r["low"]),
+                                 int(r['tick_volume']),
+                                 int(r['spread']),
+                                 int(r['real_volume']),
+                                 greg.strftime("%Y.%m.%d"),
+                                 jala.strftime("%Y.%m.%d"),
+                                 greg.strftime("%H:%M")))
+            else:
+                Analyzer.annihilate(path)
+                print(err_begin, "No candles were found!")
+                return
+            c = dt.cur(True)
+            c.execute("SHOW TABLES")
+            if table not in fn.tables(c):
+                try:
+                    c.execute("CREATE TABLE " + table + " (unix BIGINT NOT NULL UNIQUE, " +
+                              "open FLOAT, close FLOAT, high FLOAT, low FLOAT, " +
+                              "tick_volume INT, spread INT, real_volume BIGINT, " +
+                              "greg VARCHAR(10), jala VARCHAR(10), time VARCHAR(5))")
+                except OperationalError:
+                    pass  # already exists
+            for d in data:
+                try:
+                    c.execute("INSERT INTO " + table
+                              + " (unix, open, close, high, low, tick_volume, spread, real_volume, "
+                              + "greg, jala, time) "
+                              + "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", d)
+                except IntegrityError:
+                    pass
+            dt.connect.commit()
+            dt.cur(False)
+
+        elif data["action"] == "remove":
+            pass  # ....
+
         Analyzer.annihilate(path)
         print(err_begin, "DONE")
 
     @staticmethod
-    def put_temp(sym: str, timeframe: int, a: datetime, b: datetime):
-        temp = {"sym": sym, "timeframe": timeframe,
-                "start": datetime(a.year, a.month, a.day, a.hour, a.minute, tzinfo=dt.zone).timestamp(),
-                "end": datetime(b.year, b.month, b.day, b.hour, b.minute, tzinfo=dt.zone).timestamp(),
-                "state": 0}
+    def put_temp(sym: str, timeframe=None, a=None, b=None, action="insert"):
+        unixA = datetime(a.year, a.month, a.day, a.hour, a.minute,
+                         tzinfo=dt.zone).timestamp() if a is not None else None
+        unixB = datetime(b.year, b.month, b.day, b.hour, b.minute,
+                         tzinfo=dt.zone).timestamp() if b is not None else None
+        temp = {"action": action, "sym": sym, "timeframe": timeframe if timeframe is not None else None,
+                "start": unixA, "end": unixB, "state": 0}
         each = os.listdir("./temp/")
         new_name = 0
         while str(new_name) + ".json" in each:

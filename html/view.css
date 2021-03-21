@@ -13,6 +13,7 @@
     border: 1px solid #777 !important;
     border-right: none !important;
     border-radius: 0px !important;
+    direction: ltr;
 }
 .nav-link.active {
     background-color: #555 !important;
@@ -30,6 +31,7 @@ th {
     padding: 12px 0;
     font-size: 14px;
     font-family: sans-serif;
+    direction: ltr;
 }
 td {
     padding: 6px 0;

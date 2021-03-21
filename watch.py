@@ -165,7 +165,7 @@ class Watcher(Thread):
 
     @staticmethod
     def stock_open(now) -> bool:
-        return now.hour >= 9 and (now.hour < 12 or now.minute <= 30)
+        return (8 < now.hour < 12) or (now.hour == 12 and now.minute <= 30)
 
 
 def able(status, pos) -> bool:

@@ -164,9 +164,17 @@ def view(i: str):
     name = c.fetchone()
     dt.cur(False)
     if len(name) == 0:
-        raise Exception("نماد موردنظر در پایگاه داده یافت نشد!")
+        raise Exception("نماد موردنظر در پایگاه داده یافت نشد!"
+                        + " در این مواقع بهتر است «نصب و راه اندازی مجدد» را انجام دهید.")
     name = name[0]
     data = "<body>\n"
+    data += '<img src="./html/img/settings_1.png" class="fixedIcon" id="settings" ' \
+            + 'data-bs-toggle="dropdown" aria-expanded="false">'
+    data += '<ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="settings">\n' \
+            + '    <li class="dropdown-item" onclick="omit();">حذف براساس زمان</li>\n' \
+            + '    <li class="dropdown-item" onclick="truncate();">حذف براساس تایم فریم</li>\n' \
+            + '    <li class="dropdown-item" onclick="destroy();">حذف همه</li>\n' \
+            + '</ul>\n'
     data += fn.header(name)
     data += '<center id="main">\n'
     tf = dt.config["timeframes"]
@@ -230,6 +238,8 @@ def view(i: str):
         data += '    </div>\n'
     data += '</div>\n'
     data += '</center>\n'
+    data += '<input type="hidden" id="timeSeparator" value="' + dt.config["timeSeparator"] + '">\n'
+    data += '<input type="hidden" id="dateSeparator" value="' + dt.config["dateSeparator"] + '">\n'
     data += '<script type="text/javascript" src="./html/view.js"></script>\n'
     data += "</body>"
     htm = fn.template("سام: " + name, "view", data)
@@ -406,6 +416,9 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             return "invalid date"
         Analyzer.put_temp(a1, int(a2), a.to_gregorian(), b.to_gregorian())
         return '<img src="./html/img/indicator_1.png" class="indicator">'
+
+    elif q == "delete":
+        pass
 
     elif q == "shutdown":
         mt5.shutdown()

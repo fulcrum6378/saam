@@ -22,8 +22,8 @@
   "timeSeparator": ":",
   "showTimestamp": false,
   "viewingColumnNames": [
-    "Timestamp", "Open", "Close", "High", "Low",
-    "Tick Volume", "Spread", "Real Volume",
+    "Unix", "Open", "Close", "High", "Low",
+    "Tick Vol.", "Spread", "Real Vol.",
     "Gregory", "Jalali", "Time"
   ],
   "minimumRowInRequiredTables": 1
