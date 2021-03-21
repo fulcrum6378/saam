@@ -14,6 +14,8 @@ class Watcher(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.active = True
+        self.time = 0
+
         self.evMin = None
         self.ev2Min = None
         self.ev3Min = None
@@ -61,7 +63,11 @@ class Watcher(Thread):
             if v == mt5.TIMEFRAME_MN1: self.monthly = tfr
 
     def run(self) -> None:
+        if Watcher.stock_open(Watcher.when_s_now()):
+            print("STOCK MARKET IS OPEN!!!")
+
         while self.active:
+            self.time += 1
             now = Watcher.when_s_now()
 
             # When it is a holiday
@@ -78,10 +84,12 @@ class Watcher(Thread):
             dt.cur(False)
             # print("ITEMS:", len(auto))
 
-            # When Stock Market is open
-            if now.hour >= 9 and (now.hour < 12 or now.minute <= 30):
-                print("STOCK MARKET IS OPEN!!!")
-                sleep(60)
+            # When the Stock Market is open
+            if Watcher.stock_open(now):
+                self.high_level_update(auto, now)
+                now = Watcher.when_s_now()
+                nex = (now + timedelta(minutes=1)).replace(second=0, microsecond=0)
+                sleep((nex - now).total_seconds())  # DANGER: DON'T USE "60"!!!
                 continue
 
             # Other times
@@ -96,22 +104,66 @@ class Watcher(Thread):
 
     def high_level_update(self, auto: List, now: datetime):
         for a in auto:
-            status = fn.auto_to_binary(int(a[1]))
+            sta = fn.auto_to_binary(int(a[1]))
             moment = now.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=utc)
             until = now.replace(hour=0, minute=10, second=0, microsecond=0, tzinfo=utc)
-            if self.daily is not None and status[self.daily] == "1":
+            if self.daily is not None and one(sta, self.daily):
                 Analyzer.put_temp(a[0], 16408, moment, until)
-            if self.weekly is not None and status[self.weekly] == "1" and now.weekday() == 0:
+            if self.weekly is not None and one(sta, self.weekly) and now.weekday() == 0:
                 Analyzer.put_temp(a[0], 32769, moment, until)
-            if self.monthly is not None and status[self.monthly] == "1" and now.day == 1:
+            if self.monthly is not None and one(sta, self.monthly) and now.day == 1:
                 Analyzer.put_temp(a[0], 49153, moment, until)
 
     def low_level_update(self, auto: List, now: datetime):
         for a in auto:
-            status = fn.auto_to_binary(int(a[1]))
-
-            Analyzer.put_temp(a[0])
+            sta = fn.auto_to_binary(int(a[1]))
+            since = now - timedelta(minutes=1)
+            # ATTENTION: MORE CONDITIONS NEEDED FOR THE ALGORITHM...
+            if self.evMin is not None and one(sta, self.evMin):
+                Analyzer.put_temp(a[0], 1, since, now)
+            if self.ev2Min is not None and one(sta, self.ev2Min):
+                Analyzer.put_temp(a[0], 2, since, now)
+            if self.ev3Min is not None and one(sta, self.ev3Min):
+                Analyzer.put_temp(a[0], 3, since, now)
+            if self.ev4Min is not None and one(sta, self.ev4Min):
+                Analyzer.put_temp(a[0], 4, since, now)
+            if self.ev5Min is not None and one(sta, self.ev5Min):
+                Analyzer.put_temp(a[0], 5, since, now)
+            if self.ev6Min is not None and one(sta, self.ev6Min):
+                Analyzer.put_temp(a[0], 6, since, now)
+            if self.ev10Min is not None and one(sta, self.ev10Min):
+                Analyzer.put_temp(a[0], 10, since, now)
+            if self.ev12Min is not None and one(sta, self.ev12Min):
+                Analyzer.put_temp(a[0], 12, since, now)
+            if self.ev15Min is not None and one(sta, self.ev15Min):
+                Analyzer.put_temp(a[0], 15, since, now)
+            if self.ev20Min is not None and one(sta, self.ev20Min):
+                Analyzer.put_temp(a[0], 20, since, now)
+            if self.ev30Min is not None and one(sta, self.ev30Min):
+                Analyzer.put_temp(a[0], 30, since, now)
+            if self.evHour is not None and one(sta, self.evHour):
+                Analyzer.put_temp(a[0], 16385, since, now)
+            if self.ev2Hour is not None and one(sta, self.ev2Hour):
+                Analyzer.put_temp(a[0], 16386, since, now)
+            if self.ev3Hour is not None and one(sta, self.ev3Hour):
+                Analyzer.put_temp(a[0], 16387, since, now)
+            if self.ev4Hour is not None and one(sta, self.ev4Hour):
+                Analyzer.put_temp(a[0], 16388, since, now)
+            if self.ev6Hour is not None and one(sta, self.ev6Hour):
+                Analyzer.put_temp(a[0], 16390, since, now)
+            if self.ev8Hour is not None and one(sta, self.ev8Hour):
+                Analyzer.put_temp(a[0], 16392, since, now)
+            if self.ev12Hour is not None and one(sta, self.ev12Hour):
+                Analyzer.put_temp(a[0], 16396, since, now)
 
     @staticmethod
     def when_s_now():
         return datetime.now(tz=timezone("Asia/Tehran"))
+
+    @staticmethod
+    def stock_open(now) -> bool:
+        return now.hour >= 9 and (now.hour < 12 or now.minute <= 30)
+
+
+def one(status, pos) -> bool:
+    return status[pos] == "1"

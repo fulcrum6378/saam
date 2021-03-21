@@ -133,7 +133,10 @@ class Analyzer(Thread):
 
     @staticmethod
     def annihilate(path):
-        os.remove(dt.path + "temp/" + path)
+        try:
+            os.remove(dt.path + "temp/" + path)
+        except PermissionError:
+            pass  # being used by another process
 
     @staticmethod
     def is_in_temp(sym, tfr) -> bool:
