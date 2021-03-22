@@ -1,3 +1,7 @@
+# Written by Mahdi Parastesh, February and March 2021
+# Twitter: https://twitter.com/fulcrum1378
+# All rights reserved.
+
 from datetime import datetime, timedelta
 import MetaTrader5 as mt5
 from pytz import timezone, utc

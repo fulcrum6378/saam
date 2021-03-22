@@ -1,3 +1,7 @@
+# Created by Mahdi Parastesh, February and March 2021
+# Github: https://github.com/fulcrum1378
+# All rights reserved.
+
 import json
 from pymysql.cursors import Cursor
 import time
@@ -32,6 +36,14 @@ def do_connect():
                                 use_unicode=True)
     except Exception:
         connect = False
+
+
+connector = [
+    lambda: print(),
+    lambda: print('Created by Mahdi Parastesh, February and March 2021'),
+    lambda: print('Github: https://github.com/fulcrum1378'),
+    lambda: print('All rights reserved.'),
+    lambda: print()]
 
 
 # noinspection PyGlobalUndefined

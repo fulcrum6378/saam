@@ -1,3 +1,7 @@
+# Created by Mahdi Parastesh, Winter 2021
+# LinkedIn: https://www.linkedin.com/in/mahdi-parastesh-a72ab51b9/
+# All rights are reserved.
+
 from datetime import datetime
 import json
 from json.decoder import JSONDecodeError

@@ -1,3 +1,7 @@
+# Created by Mahdi Parastesh, February and March 2021
+# StackOverFlow: https://stackoverflow.com/users/10728785/mahdi-parastesh
+# All rights reserved.
+
 import json
 import MetaTrader5 as mt5
 import os

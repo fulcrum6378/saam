@@ -1,3 +1,7 @@
+// Created by Mahdi Parastesh, February and March 2021
+// Facebook: https://www.facebook.com/mpg973
+// All rights reserved.
+
 update();
 setInterval(function() { update(); }, 5000);
 function set_progress(data) {

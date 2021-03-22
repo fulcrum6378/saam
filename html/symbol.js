@@ -1,3 +1,7 @@
+// Created by Mahdi Parastesh, February and March 2021
+// LinkedIn: https://www.linkedin.com/in/mahdi-parastesh-a72ab51b9/
+// All rights reserved.
+
 // Initial Animations
 var all = $("#main > div.symbol");
 for (i = 0; i < all.length; i++) {

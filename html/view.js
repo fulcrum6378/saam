@@ -1,3 +1,7 @@
+// Created by Mahdi Parastesh, February and March 2021
+// LinkedIn: https://www.linkedin.com/in/mahdi-parastesh-a72ab51b9/
+// All rights reversed.
+
 $("td").click(function() {
     let input = document.body.appendChild(document.createElement("input"));
     input.value = $(this).text();

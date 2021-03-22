@@ -1,8 +1,13 @@
+# Created by Mahdi Parastesh, February and March 2021
+# Github: https://github.com/fulcrum1378
+# All rights reserved.
+
 import MetaTrader5 as mt5
 import simple_http_server.server as server
 
 import data
 
+for kk in data.connector: kk()
 print("Connecting to MofidTrader...")
 data.get_config()
 if not mt5.initialize(data.config["mofid_path"],

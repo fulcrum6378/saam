@@ -1,3 +1,7 @@
+// Created by Mahdi Parastesh, February and March 2021
+// Github: https://github.com/fulcrum1378
+// All rights reserved.
+
 // Initial Animations
 var all = $("#main p");
 for (i = 0; i < all.length; i++) {

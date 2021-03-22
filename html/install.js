@@ -1,3 +1,7 @@
+// Created by Mahdi Parastesh, Winter 2021
+// Github: https://github.com/fulcrum1378
+// All rights reserved.
+
 $("#installer").fadeOut(1, function() { $(this).removeClass("invisible"); });
 $("#installer").fadeIn(600);
 $("#start").click(function() { start(); });

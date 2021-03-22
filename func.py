@@ -1,3 +1,7 @@
+# Created by Mahdi Parastesh, February and March 2021
+# Github: https://github.com/fulcrum1378
+# All rights reserved.
+
 from persiantools.jdatetime import JalaliDateTime
 
 import data as dt
@@ -55,8 +59,12 @@ def tf_name(tf: int):
 
 
 def template(title: str, name: str, content: str = None) -> str:
+    htm = '<!-- Created by Mahdi Parastesh, February and March 2021 -->\n'
+    htm += '<!-- GitHub: https://github.com/fulcrum1378 -->\n'
+    htm += '<!-- LinkedIn: https://www.linkedin.com/in/mahdi-parastesh-a72ab51b9/ -->\n'
+    htm += '<!-- All rights reserved. -->\n\n'
     with open("./html/temp.html", "r", encoding="utf-8") as f:
-        htm = f.read()
+        htm += f.read()
         f.close()
     htm = htm.replace('<title />', '<title>' + title + '</title>')
     htm = htm.replace('<link />', '<link rel="stylesheet" type="text/css" href="./html/' + name + '.css">')

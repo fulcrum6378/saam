@@ -1,3 +1,7 @@
+// Created by Mahdi Parastesh, February and March 2021
+// Github: https://github.com/fulcrum1378
+// All rights reserved.
+
 function goTo(branchId, symId) {
     let adr = location.href;
     adr = adr.substring(0, adr.indexOf("search"));
