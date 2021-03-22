@@ -96,6 +96,8 @@ def index():
 
 @request_map("/branch", method="GET")
 def branch(i: str, found: str = None):
+    if classifier is not None and classifier.active:
+        return "installing... please wait..."
     c = dt.cur(True)
     c.execute("SELECT name FROM branch WHERE id = '" + str(i) + "' LIMIT 1")
     name = c.fetchone()
@@ -159,6 +161,8 @@ def branch(i: str, found: str = None):
 
 @request_map("/view", method="GET")
 def view(i: str):
+    if classifier is not None and classifier.active:
+        return "installing... please wait..."
     c = dt.cur(True)
     c.execute("SELECT name FROM symbol WHERE id = '" + str(i) + "' LIMIT 1")
     name = c.fetchone()
@@ -248,6 +252,8 @@ def view(i: str):
 
 @request_map("/search")
 def search():
+    if classifier is not None and classifier.active:
+        return "installing... please wait..."
     c = dt.cur(True)
     c.execute("SELECT id, name, branch FROM symbol")
     every = list(c)
@@ -346,7 +352,7 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         c = dt.cur(True)
         for k, v in fn.required_tables.items():
             c.execute("DROP TABLE IF EXISTS " + k)
-            c.execute("CREATE TABLE " + k + " " + v)  # TRUNCATE TABLE x
+            c.execute("CREATE TABLE " + k + " " + v)
         dt.cur(False)
 
         # TABLE symbol
@@ -358,7 +364,7 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             if got is not None and len(got) > 0:
                 inf = got[0].description
             else:
-                inf = None
+                inf = None  # if the Mofid server is off, this will be returned!!!
             sym.append((s, inf))
         c = dt.cur(True)
         c.executemany("INSERT INTO symbol (name, info) VALUES (%s, %s)", sym)

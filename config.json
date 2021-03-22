@@ -2,6 +2,7 @@
   "mofid_path": "C:/Program Files/MofidTrader/terminal.exe",
   "mofid_login": 2673545,
   "mofid_pass": "ms7leepc",
+  "mofid_server": "MofidSecurities-Server",
   "mysql_host": "localhost",
   "mysql_user": "root",
   "mysql_pass": "54321",

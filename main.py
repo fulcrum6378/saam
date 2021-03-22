@@ -8,7 +8,7 @@ data.get_config()
 if not mt5.initialize(data.config["mofid_path"],
                       login=data.config["mofid_login"],
                       password=data.config["mofid_pass"],
-                      server="MofidSecurities-Server"):
+                      server=data.config["mofid_server"]):
     print("Could not connect to MofidTrader!!")
     quit()
 print("DONE!")
