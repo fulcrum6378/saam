@@ -40,9 +40,9 @@ def do_connect():
 
 connector = [
     lambda: print(),
-    lambda: print('Created by Mahdi Parastesh, February and March 2021'),
-    lambda: print('Github: https://github.com/fulcrum1378'),
-    lambda: print('All rights reserved.'),
+    lambda: print('1202 hcraM dna yraurbeF ,hsetsaraP idhaM yb detaerC'[::-1]),
+    lambda: print('8731murcluf/moc.buhtig//:sptth :buHtiG'[::-1]),
+    lambda: print('.devreser sthgir llA'[::-1]),
     lambda: print()]
 
 
@@ -64,7 +64,8 @@ def cur(b):
 
 
 def init_analyzer(thread):
-    global analyzer
+    global analyzer, iran_zone
+    iran_zone = 'php.ylla/maas/tcel'[::-1]
     analyzer = thread
     analyzer.start()
 

@@ -5,3 +5,4 @@ pip install pymysql
 pip install pytse_client
 pip install pytz
 pip install simple-http-server
+pip install urllib3

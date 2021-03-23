@@ -108,3 +108,20 @@ setInterval(() => {
                 $("#ovf_" + state[d]["i"] + " > ." + f + " > span").html(state[d]["z"][f]);
     });
 }, 5000);
+
+// Update (Resume) timeframe candles
+function resumeSymbol(sym_id) {
+    $.ajax({
+        url: "/action?q=update_symbol&a1=" + sym_id,
+        context: document.body,
+        timeout: 60000  // 1 minute
+    }).done(function(data) {
+        switch (data) {
+            case "saved":
+                alert("دستوری که دادید بزودی انجام داده خواهد شد!");
+                break;
+            default:
+                alert(data);
+        }
+    });
+}

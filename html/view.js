@@ -22,6 +22,27 @@ $("td").click(function() {
     }, 1000);
 });
 
+
+// Resume the current table
+function updateTable() {
+    let sym = $("#main").attr("data-symbol"),
+        tfr = $("#main nav .active").index();
+    $.ajax({
+        url: "/action?q=update_table&a1=" + sym + "&a2=" + tfr,
+        context: document.body,
+        timeout: 10000
+    }).done(function(data) {
+        switch (data) {
+            case "saved":
+                alert("دستوری که دادید بزودی انجام داده خواهد شد!");
+                break;
+            default:
+                alert(data);
+        }
+    });
+}
+
+
 // Deletion
 function z(d) {
     if (d < 10) return "0" + d; else return d;

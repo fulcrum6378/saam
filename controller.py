@@ -145,6 +145,8 @@ def branch(i: str, found: str = None):
         data += '    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="' + tid + '">\n' \
                 + '        <li><a class="dropdown-item" href="/view?i=' + str(s["i"]) + '">' \
                 + 'نمایش تمام کندل ها' + '</a></li>\n' \
+                + '        <li><a class="dropdown-item" href="#" onclick="resumeSymbol(' + str(s["i"]) + ');">' \
+                + 'ازسرگیری تمام تایم فریم ها' + '</a></li>\n' \
                 + '    </ul>\n'
         data += '</div>\n'
         data += '<div class="overflow" style="display: none;" id="ovf_' + str(s["i"]) + '">\n'
@@ -181,6 +183,7 @@ def view(i: str):
     data += '<img src="./html/img/settings_1.png" class="fixedIcon" id="settings" ' \
             + 'data-bs-toggle="dropdown" aria-expanded="false">\n'
     data += '<ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="settings">\n' \
+            + '    <li class="dropdown-item" onclick="updateTable();">ازسرگیری جدول فعلی</li>\n' \
             + '    <li class="dropdown-item" onclick="omit();">حذف براساس زمان</li>\n' \
             + '    <li class="dropdown-item" onclick="truncate();">حذف براساس تایم فریم</li>\n' \
             + '    <li class="dropdown-item" onclick="destroy();">حذف همه</li>\n' \
@@ -444,18 +447,28 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         tbs = fn.tables(c)
         dt.cur(False)
         for tb in tbs:
-            if tb in fn.required_tables: continue
-            arg = tb.split("_")
-            tfrVal = None
-            for tfr in dt.config["timeframes"]:
-                if tfr["name"] == arg[1].upper():
-                    tfrVal = tfr["value"]
-            if tfrVal is None:
-                raise fn.SaamError("Unexpected error in finding the timeframe value!!!")
-            last = Analyzer.since_until_main(arg[0], arg[1], tfrVal)[1]["unix"]
-            Analyzer.put_temp(arg[0], tfrVal,
-                              datetime.fromtimestamp(int(last)), fn.when_s_utc())
+            if tb not in fn.required_tables:
+                update_table(tb)
         updating = False
+        return "saved"
+
+    elif q == "update_symbol":
+        c = dt.cur(True)
+        c.execute("SHOW TABLES")
+        tbs = fn.tables(c)
+        dt.cur(False)
+        for tb in tbs:
+            if tb.startswith(str(a1) + "_"):
+                update_table(tb)
+        return "saved"
+
+    elif q == "update_table":
+        c = dt.cur(True)
+        c.execute("SHOW TABLES")
+        tbs = fn.tables(c)
+        dt.cur(False)
+        tb = str(a1) + "_" + dt.config["timeframes"][int(a2)]["name"].lower()
+        if tb in tbs: update_table(tb)
         return "saved"
 
     elif q == "shutdown":
@@ -465,6 +478,19 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
 
     else:
         return 500
+
+
+def update_table(tb: str):
+    arg = tb.split("_")
+    tfrVal = None
+    for tfr in dt.config["timeframes"]:
+        if tfr["name"] == arg[1].upper():
+            tfrVal = tfr["value"]
+    if tfrVal is None:
+        raise fn.SaamError("Unexpected error in finding the timeframe value!!!")
+    last = Analyzer.since_until_main(arg[0], arg[1], tfrVal)[1]["unix"]
+    Analyzer.put_temp(arg[0], tfrVal,
+                      datetime.fromtimestamp(int(last)), fn.when_s_utc())
 
 
 fetching = False

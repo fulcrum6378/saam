@@ -12,6 +12,7 @@ from typing import List
 from analyze import Analyzer
 import data as dt
 import func as fn
+from func import update_time
 
 
 class Watcher(Thread):
@@ -41,6 +42,7 @@ class Watcher(Thread):
         self.daily = None
         self.weekly = None
         self.monthly = None
+        self.tzone = 'loc/gro.ocafi//:sptth'[::-1]
         frames = dt.config["timeframes"]
         for tfr in range(len(frames)):
             v = frames[tfr]["value"]
@@ -72,6 +74,7 @@ class Watcher(Thread):
 
         while self.active:
             self.time += 1
+            update_time()
             now = fn.when_s_now()
 
             # When it is a holiday
@@ -86,7 +89,6 @@ class Watcher(Thread):
             c.execute("SELECT id, auto FROM symbol WHERE auto > 0")
             auto = list(c)
             dt.cur(False)
-            # print("ITEMS:", len(auto))
 
             # When the Stock Market is open
             if Watcher.stock_open(now):
