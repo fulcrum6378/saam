@@ -16,6 +16,24 @@ function branch(i) {
 
 
 // Floating Menu
+function updateAll() {
+    $.ajax({
+        url: "/action?q=update_all",
+        context: document.body,
+        timeout: 60 * 60000  // 1 hour
+    }).done(function(data) {
+        switch (data) {
+            case "already":
+                alert("شما قبلا این دستور را داده اید و هنوز تمام نشده است...");
+                break;
+            case "saved":
+                alert("دستوری که دادید بزودی انجام داده خواهد شد!");
+                break;
+            default:
+                alert(data);
+        }
+    });
+}
 function reset() {
     if (!confirm("آیا از این کار مطمئن هستید؟")) return;
     $.ajax({

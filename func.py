@@ -2,7 +2,10 @@
 # Github: https://github.com/fulcrum1378
 # All rights reserved.
 
+from datetime import datetime
 from persiantools.jdatetime import JalaliDateTime
+from pytz import timezone, utc
+from typing import List
 
 import data as dt
 
@@ -22,7 +25,7 @@ def sql_esc(msg):
     return msg
 
 
-def tables(c):
+def tables(c) -> List[str]:
     tbs = list()
     for x in c:
         try:
@@ -100,6 +103,14 @@ def persian_board(board: str):
         return None
     else:
         return a, b
+
+
+def when_s_now():
+    return datetime.now(tz=timezone("Asia/Tehran"))
+
+
+def when_s_utc():
+    return datetime.now(tz=utc)
 
 
 class SaamError(Exception):

@@ -67,12 +67,12 @@ class Watcher(Thread):
             if v == mt5.TIMEFRAME_MN1: self.monthly = tfr
 
     def run(self) -> None:
-        if Watcher.stock_open(Watcher.when_s_now()):
+        if Watcher.stock_open(fn.when_s_now()):
             print("STOCK MARKET IS OPEN!!!")
 
         while self.active:
             self.time += 1
-            now = Watcher.when_s_now()
+            now = fn.when_s_now()
 
             # When it is a holiday
             if now.weekday() == 4:
@@ -91,7 +91,7 @@ class Watcher(Thread):
             # When the Stock Market is open
             if Watcher.stock_open(now):
                 self.low_level_update(auto, now)
-                now = Watcher.when_s_now()
+                now = fn.when_s_now()
                 nex = (now + timedelta(minutes=1)).replace(second=0, microsecond=0)
                 dist = (nex - now).total_seconds()
                 if dist > 0: sleep(dist)  # DANGER: DON'T USE "60"!!!
@@ -99,7 +99,7 @@ class Watcher(Thread):
 
             # Other times
             self.high_level_update(auto, now)
-            now = Watcher.when_s_now()
+            now = fn.when_s_now()
             if now.hour < 9:
                 nex = now.replace(hour=9, minute=0, second=0, microsecond=0)
             else:
@@ -162,10 +162,6 @@ class Watcher(Thread):
             if able(sta, self.ev12Hour) and now.minute == 0:
                 Analyzer.put_temp(a[0], 16396, now - timedelta(hours=12, minutes=5), now)
             # Since the hourly candles are unorganized, we won't tighten the above conditions
-
-    @staticmethod
-    def when_s_now():
-        return datetime.now(tz=timezone("Asia/Tehran"))
 
     @staticmethod
     def stock_open(now) -> bool:

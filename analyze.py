@@ -27,7 +27,7 @@ class Analyzer(Thread):
     def run(self):
         while self.active:
             temp = os.listdir(dt.path + "temp/")
-            if temp: Analyzer.process(temp[0])
+            if temp: Analyzer.process(self, temp[0])
             if len(temp) == 1: time.sleep(15)
 
     @staticmethod
@@ -47,8 +47,8 @@ class Analyzer(Thread):
             f.write(json.dumps(data))
             f.close()
 
-    @staticmethod
-    def process(path) -> None:
+    # noinspection PyMethodMayBeStatic
+    def process(self, path) -> None:
         err_begin = "ANALYZER ( " + path + " ): "
         print(err_begin, "STARTED")
         data: dict = Analyzer.read_temp(path)
@@ -183,22 +183,32 @@ class Analyzer(Thread):
         return ret
 
     @staticmethod
-    def since_until(sym, tfrName, tfrValue) -> str:
+    def since_until_main(sym, tfrName, tfrValue):
         if Analyzer.is_in_temp(sym, tfrValue):
-            return '<img src="./html/img/indicator_1.png" class="indicator">'
+            return "..."
         tName = (sym + "_" + tfrName).lower()
         c = dt.cur(True)
         c.execute("SHOW TABLES")
         tbs = fn.tables(c)
         dt.cur(False)
-        if tName not in tbs: return "هیچ وقت"
-        c = dt.cur(True)
+        if tName not in tbs: return None
+        c = dt.cur(True)  # DON'T TOUCH THIS
         c.execute("SELECT unix, jala, time FROM " + tName)
         got: List[dict] = list()
         for g in c: got.append({"unix": g[0], "jala": g[1], "time": g[2]})
         dt.cur(False)
         if len(got) == 0: return "هیچ وقت"
-        got = sorted(got, key=lambda k: k["unix"])
-        first = got[0]
-        last = got[-1]
-        return "از " + first["jala"] + " - " + first["time"] + " تا " + last["jala"] + " - " + last["time"]
+        ret = sorted(got, key=lambda k: k["unix"])
+        return [ret[0], ret[-1]]
+
+    @staticmethod
+    def since_until(sym, tfrName, tfrValue) -> str:
+        ret = Analyzer.since_until_main(sym, tfrName, tfrValue)
+        if ret == "...":
+            return '<img src="./html/img/indicator_1.png" class="indicator">'
+        elif ret is None:
+            return "هیچ وقت"
+        else:
+            first = ret[0]
+            last = ret[1]
+            return "از " + first["jala"] + " - " + first["time"] + " تا " + last["jala"] + " - " + last["time"]

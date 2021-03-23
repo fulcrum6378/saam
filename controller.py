@@ -2,6 +2,7 @@
 # StackOverFlow: https://stackoverflow.com/users/10728785/mahdi-parastesh
 # All rights reserved.
 
+from datetime import datetime
 import json
 import MetaTrader5 as mt5
 import os
@@ -60,6 +61,7 @@ def index():
         data += '<img src="./html/img/settings_1.png" class="fixedIcon" id="settings" ' \
                 + 'data-bs-toggle="dropdown" aria-expanded="false">'
         data += '<ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="settings">\n' \
+                + '    <li class="dropdown-item" onclick="updateAll();">ازسرگیری کلی</li>\n' \
                 + '    <li class="dropdown-item" onclick="reset();">نصب و راه اندازی مجدد</li>\n' \
                 + '    <li class="dropdown-item" onclick="shutdown();">خاموش</li>\n' \
                 + '</ul>\n'
@@ -433,6 +435,29 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         Analyzer.put_temp(a1, tfr, a, b, "delete")
         return "saved"
 
+    elif q == "update_all":
+        global updating
+        if updating: return "already"
+        updating = True
+        c = dt.cur(True)
+        c.execute("SHOW TABLES")
+        tbs = fn.tables(c)
+        dt.cur(False)
+        for tb in tbs:
+            if tb in fn.required_tables: continue
+            arg = tb.split("_")
+            tfrVal = None
+            for tfr in dt.config["timeframes"]:
+                if tfr["name"] == arg[1].upper():
+                    tfrVal = tfr["value"]
+            if tfrVal is None:
+                raise fn.SaamError("Unexpected error in finding the timeframe value!!!")
+            last = Analyzer.since_until_main(arg[0], arg[1], tfrVal)[1]["unix"]
+            Analyzer.put_temp(arg[0], tfrVal,
+                              datetime.fromtimestamp(int(last)), fn.when_s_utc())
+        updating = False
+        return "saved"
+
     elif q == "shutdown":
         mt5.shutdown()
         dt.connect.close()
@@ -444,3 +469,4 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
 
 fetching = False
 classifier = None
+updating = False
