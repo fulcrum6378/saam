@@ -79,6 +79,7 @@ class Analyzer(Thread):
                 Analyzer.annihilate(path)
                 try:
                     print(err_begin, str(mt5.last_error()))
+                    print("DETAILS:", str(data))
                 except:
                     print(err_begin, "UNKNOWN ERROR!")
                 return

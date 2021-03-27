@@ -20,6 +20,7 @@ class Watcher(Thread):
         Thread.__init__(self)
         self.active = True
         self.time = 0
+        self.last_update = None
 
         self.evMin = None
         self.ev2Min = None
@@ -74,7 +75,7 @@ class Watcher(Thread):
 
         while self.active:
             self.time += 1
-            update_time()
+            self.last_update = update_time(self.last_update)
             now = fn.when_s_now()
 
             # When it is a holiday
@@ -122,6 +123,7 @@ class Watcher(Thread):
                 Analyzer.put_temp(a[0], 49153, moment, until)
 
     def low_level_update(self, auto: List, now: datetime):
+        now = now.replace(tzinfo=utc)
         for a in auto:
             sta = fn.auto_to_binary(int(a[1]))
             cau = 30
