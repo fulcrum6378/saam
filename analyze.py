@@ -28,7 +28,7 @@ class Analyzer(Thread):
         while self.active:
             temp = os.listdir(dt.path + "temp/")
             if temp: Analyzer.process(self, temp[0])
-            if len(temp) == 1: time.sleep(15)
+            if len(temp) == 1: time.sleep(10)
 
     @staticmethod
     def read_temp(path) -> dict:

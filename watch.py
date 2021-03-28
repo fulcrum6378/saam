@@ -122,49 +122,49 @@ class Watcher(Thread):
             if able(sta, self.monthly) and now.day == 1:
                 Analyzer.put_temp(a[0], 49153, moment, until)
 
-    def low_level_update(self, auto: List, now: datetime):
-        now = now.replace(tzinfo=utc)
+    def low_level_update(self, auto: List, now_iran: datetime):
+        now = now_iran + timedelta(hours=3, minutes=30)
+        cau, mca = 0, 3
         for a in auto:
             sta = fn.auto_to_binary(int(a[1]))
-            cau = 30
             # Minutes
             if able(sta, self.evMin):
-                Analyzer.put_temp(a[0], 1, now - timedelta(minutes=1, seconds=cau), now)
+                Analyzer.put_temp(a[0], 1, now - timedelta(minutes=1 + mca, seconds=cau), now)
             if able(sta, self.ev2Min) and now.minute % 2 == 0:
-                Analyzer.put_temp(a[0], 2, now - timedelta(minutes=2, seconds=cau), now)
+                Analyzer.put_temp(a[0], 2, now - timedelta(minutes=2 + mca, seconds=cau), now)
             if able(sta, self.ev3Min) and now.minute % 3 == 0:
-                Analyzer.put_temp(a[0], 3, now - timedelta(minutes=3, seconds=cau), now)
+                Analyzer.put_temp(a[0], 3, now - timedelta(minutes=3 + mca, seconds=cau), now)
             if able(sta, self.ev4Min) and now.minute % 4 == 0:
-                Analyzer.put_temp(a[0], 4, now - timedelta(minutes=4, seconds=cau), now)
+                Analyzer.put_temp(a[0], 4, now - timedelta(minutes=4 + mca, seconds=cau), now)
             if able(sta, self.ev5Min) and now.minute % 5 == 0:
-                Analyzer.put_temp(a[0], 5, now - timedelta(minutes=5, seconds=cau), now)
+                Analyzer.put_temp(a[0], 5, now - timedelta(minutes=5 + mca, seconds=cau), now)
             if able(sta, self.ev6Min) and now.minute % 6 == 0:
-                Analyzer.put_temp(a[0], 6, now - timedelta(minutes=6, seconds=cau), now)
+                Analyzer.put_temp(a[0], 6, now - timedelta(minutes=6 + mca, seconds=cau), now)
             if able(sta, self.ev10Min) and now.minute % 10 == 0:
-                Analyzer.put_temp(a[0], 10, now - timedelta(minutes=10, seconds=cau), now)
+                Analyzer.put_temp(a[0], 10, now - timedelta(minutes=10 + mca, seconds=cau), now)
             if able(sta, self.ev12Min) and now.minute % 12 == 0:
-                Analyzer.put_temp(a[0], 12, now - timedelta(minutes=12, seconds=cau), now)
+                Analyzer.put_temp(a[0], 12, now - timedelta(minutes=12 + mca, seconds=cau), now)
             if able(sta, self.ev15Min) and now.minute % 15 == 0:
-                Analyzer.put_temp(a[0], 15, now - timedelta(minutes=15, seconds=cau), now)
+                Analyzer.put_temp(a[0], 15, now - timedelta(minutes=15 + mca, seconds=cau), now)
             if able(sta, self.ev20Min) and now.minute % 20 == 0:
-                Analyzer.put_temp(a[0], 20, now - timedelta(minutes=20, seconds=cau), now)
+                Analyzer.put_temp(a[0], 20, now - timedelta(minutes=20 + mca, seconds=cau), now)
             if able(sta, self.ev30Min) and now.minute % 30 == 0:
-                Analyzer.put_temp(a[0], 30, now - timedelta(minutes=30, seconds=cau), now)
+                Analyzer.put_temp(a[0], 30, now - timedelta(minutes=30 + mca, seconds=cau), now)
             # Hours
             if able(sta, self.evHour) and now.minute == 0:
-                Analyzer.put_temp(a[0], 16385, now - timedelta(hours=1, minutes=5), now)
+                Analyzer.put_temp(a[0], 16385, now - timedelta(hours=1 + mca, minutes=5), now)
             if able(sta, self.ev2Hour) and now.minute == 0:
-                Analyzer.put_temp(a[0], 16386, now - timedelta(hours=2, minutes=5), now)
+                Analyzer.put_temp(a[0], 16386, now - timedelta(hours=2 + mca, minutes=5), now)
             if able(sta, self.ev3Hour) and now.minute == 0:
-                Analyzer.put_temp(a[0], 16387, now - timedelta(hours=3, minutes=5), now)
+                Analyzer.put_temp(a[0], 16387, now - timedelta(hours=3 + mca, minutes=5), now)
             if able(sta, self.ev4Hour) and now.minute == 0:
-                Analyzer.put_temp(a[0], 16388, now - timedelta(hours=4, minutes=5), now)
+                Analyzer.put_temp(a[0], 16388, now - timedelta(hours=4 + mca, minutes=5), now)
             if able(sta, self.ev6Hour) and now.minute == 0:
-                Analyzer.put_temp(a[0], 16390, now - timedelta(hours=6, minutes=5), now)
+                Analyzer.put_temp(a[0], 16390, now - timedelta(hours=6 + mca, minutes=5), now)
             if able(sta, self.ev8Hour) and now.minute == 0:
-                Analyzer.put_temp(a[0], 16392, now - timedelta(hours=8, minutes=5), now)
+                Analyzer.put_temp(a[0], 16392, now - timedelta(hours=8 + mca, minutes=5), now)
             if able(sta, self.ev12Hour) and now.minute == 0:
-                Analyzer.put_temp(a[0], 16396, now - timedelta(hours=12, minutes=5), now)
+                Analyzer.put_temp(a[0], 16396, now - timedelta(hours=12 + mca, minutes=5), now)
             # Since the hourly candles are unorganized, we won't tighten the above conditions
 
     @staticmethod
