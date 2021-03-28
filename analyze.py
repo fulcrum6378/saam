@@ -72,6 +72,8 @@ class Analyzer(Thread):
                 print(err_begin, "Could not find this symbol in the database!!!")
                 return
             found = found[0]
+            print("FROM", datetime.fromtimestamp(data["start"], tz=utc))
+            print("TO", datetime.fromtimestamp(data["end"], tz=utc))
             rates = mt5.copy_rates_range(found, data["timeframe"],
                                          datetime.fromtimestamp(data["start"], tz=utc),
                                          datetime.fromtimestamp(data["end"], tz=utc))

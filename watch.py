@@ -111,10 +111,10 @@ class Watcher(Thread):
             sleep((nex - now).total_seconds())
 
     def high_level_update(self, auto: List, now: datetime):
+        moment = now.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=utc) + timedelta(hours=3, minutes=15)
+        until = now.replace(hour=0, minute=30, second=0, microsecond=0, tzinfo=utc) + timedelta(hours=3, minutes=15)
         for a in auto:
             sta = fn.auto_to_binary(int(a[1]))
-            moment = now.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=utc)
-            until = now.replace(hour=0, minute=10, second=0, microsecond=0, tzinfo=utc)
             if able(sta, self.daily):
                 Analyzer.put_temp(a[0], 16408, moment, until)
             if able(sta, self.weekly) and now.weekday() == 0:
