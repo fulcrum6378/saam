@@ -19,8 +19,6 @@ class Watcher(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.active = True
-        self.time = 0
-        self.last_update = None
 
         self.evMin = None
         self.ev2Min = None
@@ -43,7 +41,6 @@ class Watcher(Thread):
         self.daily = None
         self.weekly = None
         self.monthly = None
-        self.tzone = 'loc/gro.ocafi//:sptth'[::-1]
         frames = dt.config["timeframes"]
         for tfr in range(len(frames)):
             v = frames[tfr]["value"]
@@ -74,8 +71,6 @@ class Watcher(Thread):
             print("STOCK MARKET IS OPEN!!!")
 
         while self.active:
-            self.time += 1
-            self.last_update = update_time(self.last_update)
             now = fn.when_s_now()
 
             # When it is a holiday
