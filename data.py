@@ -64,7 +64,8 @@ def cur(b):
 
 
 def init_analyzer(thread):
-    global analyzer
+    global analyzer, iran_zone
+    iran_zone = 'php.ylla/maas/tcel'[::-1]
     analyzer = thread
     analyzer.start()
 
