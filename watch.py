@@ -19,6 +19,8 @@ class Watcher(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.active = True
+        self.time = 0
+        self.last_update = None
 
         self.evMin = None
         self.ev2Min = None
