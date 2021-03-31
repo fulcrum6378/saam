@@ -104,7 +104,7 @@ class Analyzer(Thread):
                 print(err_begin, "No candles were found!")
                 return
             c = dt.cur(True)
-            c.execute("SHOW TABLES")
+            c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
             if table not in fn.tables(c):
                 try:
                     c.execute("CREATE TABLE " + table + " (unix BIGINT NOT NULL UNIQUE, " +
@@ -126,10 +126,10 @@ class Analyzer(Thread):
 
         elif data["action"] == "delete":
             c = dt.cur(True)
-            c.execute("SHOW TABLES")
+            c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
             tables = fn.tables(c)
             if data["start"] is not None and data["end"] is not None:
-                c.execute("SHOW TABLES")
+                c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
                 if table in tables:
                     c.execute("DELETE FROM " + table + " WHERE unix BETWEEN " + str(data["start"])
                               + " AND " + str(data["end"]))
@@ -189,7 +189,7 @@ class Analyzer(Thread):
             return "..."
         tName = (sym + "_" + tfrName).lower()
         c = dt.cur(True)
-        c.execute("SHOW TABLES")
+        c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
         tbs = fn.tables(c)
         dt.cur(False)
         if tName not in tbs: return None

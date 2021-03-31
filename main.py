@@ -25,7 +25,7 @@ except:
     my_ip = input("Please enter your device's IP address:")
 webbrowser.open("http://" + str(my_ip) + ":1399/")
 try:
-    server.scan("", "controller.py")
+    server.scan("", r".*controller.*")
     server.start(host=my_ip, port=1399)
 except Exception as e:
     if str(e) == "[WinError 10022] Windows Error 0x2726":

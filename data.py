@@ -67,7 +67,7 @@ connector = [
 
 # noinspection PyGlobalUndefined
 def cur(b):
-    global c
+    global connect, c
     if b:
         while True:
             try:

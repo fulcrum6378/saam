@@ -24,10 +24,15 @@ def index():
     if classifier is not None and classifier.active:
         status = "installing"
     else:
+        print("111")
         c = dt.cur(True)
-        c.execute("SHOW TABLES")
+        print("222", c)
+        c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
+        print("333", "executed")
         tables = fn.tables(c)
+        print("444", tables)
         dt.cur(False)
+        print("555", "closed")
         all_set = True
         for k, v in fn.required_tables.items():
             if k not in tables:
@@ -442,7 +447,7 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         if updating: return "already"
         updating = True
         c = dt.cur(True)
-        c.execute("SHOW TABLES")
+        c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
         tbs = fn.tables(c)
         dt.cur(False)
         for tb in tbs:
@@ -453,7 +458,7 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
 
     elif q == "update_symbol":
         c = dt.cur(True)
-        c.execute("SHOW TABLES")
+        c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
         tbs = fn.tables(c)
         dt.cur(False)
         for tb in tbs:
@@ -463,7 +468,7 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
 
     elif q == "update_table":
         c = dt.cur(True)
-        c.execute("SHOW TABLES")
+        c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
         tbs = fn.tables(c)
         dt.cur(False)
         tb = str(a1) + "_" + dt.config["timeframes"][int(a2)]["name"].lower()

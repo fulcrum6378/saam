@@ -93,6 +93,7 @@ class Watcher(Thread):
                 auto = list(c)
                 dt.cur(False)
             except OperationalError:
+                dt.cur(False)
                 sleep(30)
                 continue
 
