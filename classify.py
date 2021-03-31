@@ -37,7 +37,7 @@ class Classify(Thread):
             exists = list()
             for i in c: exists.append(i)
             if len(exists) == 0:
-                c.execute("INSERT INTO branch (name) VALUES (%s)", branch)
+                c.execute("INSERT INTO branch (name) VALUES (?)", [branch])
                 dt.connect.commit()
                 branch_id = c.lastrowid
             else:

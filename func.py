@@ -13,12 +13,10 @@ from urllib3 import PoolManager
 import data as dt
 
 required_tables = {  # NEVER USE 'desc' or 'group' AS TABLE NAME
-    "symbol": "(id INT AUTO_INCREMENT PRIMARY KEY, "
-              + "name VARCHAR(75) CHARACTER SET utf8 COLLATE utf8_unicode_ci, "
-              + "info VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL, "
-              + "branch INT DEFAULT '-1', auto SMALLINT DEFAULT '0')",
-    "branch": "(id INT AUTO_INCREMENT PRIMARY KEY, "
-              + "name VARCHAR(150) CHARACTER SET utf8 COLLATE utf8_unicode_ci)"
+    "symbol": "(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(75), "
+              + "info VARCHAR(200) DEFAULT NULL, "
+              + "branch INTEGER DEFAULT '-1', auto SMALLINT DEFAULT '0')",
+    "branch": "(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(150))"
 }
 
 

@@ -395,7 +395,7 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
                 inf = None  # if the Mofid server is off, this will be returned!!!
             sym.append((s, inf))
         c = dt.cur(True)
-        c.executemany("INSERT INTO symbol (name, info) VALUES (%s, %s)", sym)
+        c.executemany("INSERT INTO symbol (name, info) VALUES (?, ?)", sym)
         dt.connect.commit()
         dt.cur(False)
         fetching = False

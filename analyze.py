@@ -107,7 +107,7 @@ class Analyzer(Thread):
             c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
             if table not in fn.tables(c):
                 try:
-                    c.execute("CREATE TABLE " + table + " (unix BIGINT NOT NULL UNIQUE, " +
+                    c.execute("CREATE TABLE " + table + " (unix BIGINT NOT NULL PRIMARY KEY, " +
                               "open FLOAT, close FLOAT, high FLOAT, low FLOAT, " +
                               "tick_volume INT, spread INT, real_volume BIGINT, " +
                               "greg VARCHAR(10), jala VARCHAR(10), time VARCHAR(5))")
@@ -118,7 +118,7 @@ class Analyzer(Thread):
                     c.execute("INSERT INTO " + table
                               + " (unix, open, close, high, low, tick_volume, spread, real_volume, "
                               + "greg, jala, time) "
-                              + "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", d)
+                              + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", d)
                 except sqlite3.IntegrityError:
                     pass
             dt.connect.commit()
