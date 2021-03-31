@@ -2,7 +2,6 @@
 # Github: https://github.com/fulcrum1378
 # All rights reserved.
 
-import MetaTrader5 as mt5
 import simple_http_server.server as server
 import webbrowser
 

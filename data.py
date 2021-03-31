@@ -3,10 +3,11 @@
 # All rights reserved.
 
 import json
-import sqlite3
+import MetaTrader5 as mt5
 import os.path
-from time import sleep
 from pytz import timezone
+import sqlite3
+from time import sleep
 
 
 # noinspection PyGlobalUndefined
@@ -30,15 +31,18 @@ def save_config():
 
 # noinspection PyGlobalUndefined
 def do_connect():
-    global connect, db_name
+    global connect
     try:
-        connect = sqlite3.connect(db_name, check_same_thread=False)
+        connect = sqlite3.connect("main.db", check_same_thread=False)
     except Exception:
         connect = False
     return connect
 
 
+# noinspection PyGlobalUndefined
 def init_mofid():
+    global mofid
+    mofid = False
     if config["mofid_path"] is None:
         possible = ["C:/Program Files/MofidTrader/terminal.exe",
                     "C:/Program Files/MofidTrader/terminal64.exe"]
@@ -47,16 +51,19 @@ def init_mofid():
                 config["mofid_path"] = pos
                 save_config()
                 break
-        if config["mofid_path"] is None: return False
+        if config["mofid_path"] is None: return mofid
+    if config["mofid_server"] is None:
+        config["mofid_server"] = "MofidSecurities-Server"
+        save_config()
     if config["mofid_login"] is None or config["mofid_pass"] is None:
-        return False
-    return mt5.initialize(data.config["mofid_path"],
-                          login=config["mofid_login"],
-                          password=config["mofid_pass"],
-                          server="MofidSecurities-Server")
+        return mofid
+    mofid = mt5.initialize(config["mofid_path"],
+                           login=config["mofid_login"],
+                           password=config["mofid_pass"],
+                           server=config["mofid_server"])
+    return mofid
 
 
-db_name = "main.db"
 connector = [
     lambda: print(),
     lambda: print('1202 hcraM dna yraurbeF ,hsetsaraP idhaM yb detaerC'[::-1]),

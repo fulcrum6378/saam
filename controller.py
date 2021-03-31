@@ -20,19 +20,25 @@ import func as fn
 
 @request_map("/")
 def index():
+    if not dt.mofid:
+        data = "<body>\n"
+        data += fn.header("ورود به مفید تریدر")
+        with open("./html/login.html", "r", encoding="utf-8") as f:
+            data += f.read()
+            f.close()
+        data += '<script type="text/javascript" src="./html/login.js"></script>\n'
+        data += "</body>"
+        htm = fn.template("سام: ورود به مفید تریدر", "login", data)
+        return 200, Headers({"Content-Type": "text/html"}), htm
+
     global classifier
     if classifier is not None and classifier.active:
         status = "installing"
     else:
-        print("111")
         c = dt.cur(True)
-        print("222", c)
         c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
-        print("333", "executed")
         tables = fn.tables(c)
-        print("444", tables)
         dt.cur(False)
-        print("555", "closed")
         all_set = True
         for k, v in fn.required_tables.items():
             if k not in tables:
@@ -358,7 +364,16 @@ def query(q: str, a1: str = "", a2: str = "", a3: str = ""):
 
 @request_map("/action", method="GET")
 def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
-    if q == "install":
+    if q == "login":
+        try:
+            dt.config["mofid_login"] = int(a1)
+        except:
+            return "فقط عدد مجاز است!"
+        dt.config["mofid_pass"] = a2
+        dt.save_config()
+        return str(dt.init_mofid())
+
+    elif q == "install":
         global fetching
         if fetching: return "already"
         fetching = True
