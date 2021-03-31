@@ -5,6 +5,8 @@
 from datetime import datetime, timedelta
 from persiantools.jdatetime import JalaliDateTime
 from pytz import timezone, utc
+import sqlite3
+from threading import Thread
 from typing import List
 from urllib3 import PoolManager
 
@@ -122,6 +124,27 @@ def when_s_now():
 
 def when_s_utc():
     return datetime.now(tz=utc)
+
+
+class Connector(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.active = True
+        self.connect = sqlite3.connect(dt.db_name, check_same_thread=False)
+
+    def cur(self, b):
+        if b:
+            while True:
+                try:
+                    self.c
+                except AttributeError:
+                    self.c = self.connect.cursor()
+                    return self.c
+                else:
+                    sleep(2)
+        elif isinstance(self.c, sqlite3.Cursor):
+            self.c.close()
+            delattr(self, "c")
 
 
 class SaamError(Exception):

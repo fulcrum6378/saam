@@ -6,23 +6,20 @@ import pytse_client as tse
 from threading import Thread
 
 import data as dt
+from func import Connector
 
 
-# In MySQL Workbench, never interact with the database if the Python programme is using it!
-
-
-class Classify(Thread):
+class Classify(Connector):
     def __init__(self):
-        Thread.__init__(self)
+        Connector.__init__(self)
         self.install_progress = 0
-        self.active = True
 
     def run(self):
-        c = dt.cur(True)
+        c = self.cur(True)
         c.execute("SELECT * FROM symbol")  # gives the same tuple you inserted.
         symbols = list()  # list of tuples
         for i in c: symbols.append(i)
-        dt.cur(False)
+        self.cur(False)
 
         sum_all = len(symbols)
         for s in range(len(symbols)):  # never change global statements inside a loop
@@ -35,7 +32,7 @@ class Classify(Thread):
             print("Classifying symbol", s, "of", sum_all)
 
             # Check if it exists in 'branch'
-            c = dt.cur(True)
+            c = self.cur(True)
             c.execute("SELECT * FROM branch WHERE name='" + branch + "' LIMIT 1")
             exists = list()
             for i in c: exists.append(i)
@@ -49,5 +46,5 @@ class Classify(Thread):
             # Update symbol
             c.execute("UPDATE symbol SET branch='" + str(branch_id) + "' WHERE name='" + symbol_name + "'")
             dt.connect.commit()
-            dt.cur(False)
+            self.cur(False)
         self.active = False

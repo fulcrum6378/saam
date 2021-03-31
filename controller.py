@@ -7,10 +7,9 @@ import json
 import MetaTrader5 as mt5
 import os
 from persiantools.jdatetime import JalaliDateTime
-from pymysql.err import ProgrammingError
+from sqlite3 import ProgrammingError
 import pytse_client as tse
 import signal
-# noinspection PyUnresolvedReferences
 from simple_http_server import request_map, PathValue, Headers, StaticFile
 
 from analyze import Analyzer
@@ -25,16 +24,16 @@ def index():
     if classifier is not None and classifier.active:
         status = "installing"
     else:
-        c = dt.cur(True)
+        c = cur(True)
         c.execute("SHOW TABLES")
         tables = fn.tables(c)
-        dt.cur(False)
+        cur(False)
         all_set = True
         for k, v in fn.required_tables.items():
             if k not in tables:
                 all_set = False
             else:
-                c = dt.cur(True)
+                c = cur(True)
                 c.execute("SELECT id FROM " + k)
                 rowCount = len(list(c))
                 fuck_all = False
@@ -43,7 +42,7 @@ def index():
                         c.execute("DROP TABLE IF EXISTS " + kk)
                     all_set = False
                     fuck_all = True
-                dt.cur(False)
+                cur(False)
                 if fuck_all: break
         if all_set:
             status = "yes"
@@ -68,13 +67,13 @@ def index():
         data += '<img src="./html/img/search_1.png" class="fixedIcon" id="search" onclick="search();">'
         data += fn.header("گروه ها")
         data += '<center id="main">\n'
-        c = dt.cur(True)
+        c = cur(True)
         c.execute("SELECT * FROM branch")
         load = list()
         for b in list(c):
             c.execute("SELECT id FROM symbol WHERE branch = '" + str(b[0]) + "'")
             load.append({"i": b[0], "n": b[1], "s": len(list(c))})
-        dt.cur(False)
+        cur(False)
 
         load.sort(key=lambda r: r["n"])
         for b in load:
@@ -104,20 +103,20 @@ def index():
 def branch(i: str, found: str = None):
     if classifier is not None and classifier.active:
         return "installing... please wait..."
-    c = dt.cur(True)
+    c = cur(True)
     c.execute("SELECT name FROM branch WHERE id = '" + str(i) + "' LIMIT 1")
     name = c.fetchone()
-    dt.cur(False)
+    cur(False)
     if len(name) == 0:
         raise fn.SaamError("گروه موردنظر در پایگاه داده یافت نشد!")
     name = name[0]
     data = "<body>\n"
     data += fn.header(name)
     data += '<center id="main" data-branch="' + i + '">\n'
-    c = dt.cur(True)
+    c = cur(True)
     c.execute("SELECT id, name, info, auto FROM symbol WHERE branch = '" + i + "'")
     got = list(c)
-    dt.cur(False)
+    cur(False)
     load = list()
     for s in got:
         tfs = dict()
@@ -171,10 +170,10 @@ def branch(i: str, found: str = None):
 def view(i: str):
     if classifier is not None and classifier.active:
         return "installing... please wait..."
-    c = dt.cur(True)
+    c = cur(True)
     c.execute("SELECT name FROM symbol WHERE id = '" + str(i) + "' LIMIT 1")
     name = c.fetchone()
-    dt.cur(False)
+    cur(False)
     if len(name) == 0:
         raise fn.SaamError("نماد موردنظر در پایگاه داده یافت نشد!"
                            + " در این مواقع بهتر است «نصب و راه اندازی مجدد» را انجام دهید.")
@@ -211,14 +210,14 @@ def view(i: str):
         data += '    <div class="tab-pane table-responsive fade' + active + '" id="nav-' + t["name"] + '" ' \
                 + 'role="tabpanel" aria-labelledby="nav-' + t["name"] + '-tab">\n'
         tName = str(i) + "_" + t["name"]
-        c = dt.cur(True)
+        c = cur(True)
         got = None
         try:
             c.execute("SELECT * FROM " + tName)
             got = list(c)
         except ProgrammingError:
             pass
-        dt.cur(False)
+        cur(False)
         length = str(len(got)) if got is not None else "0"
         data = data.replace('<span class="' + badge_classes + '">000</span>',
                             '<span class="' + badge_classes + '">' + length + '</span>', 1)
@@ -263,10 +262,10 @@ def view(i: str):
 def search():
     if classifier is not None and classifier.active:
         return "installing... please wait..."
-    c = dt.cur(True)
+    c = cur(True)
     c.execute("SELECT id, name, branch FROM symbol")
     every = list(c)
-    dt.cur(False)
+    cur(False)
     every.sort(key=lambda k: k[1])
 
     data = "<body>\n"
@@ -323,7 +322,7 @@ def favicon():
     return StaticFile("./html/img/favicon.ico", "image/vnd.microsoft.icon")
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 @request_map("/query", method="GET")
 def query(q: str, a1: str = "", a2: str = "", a3: str = ""):
     if q == "install_progress":
@@ -336,10 +335,10 @@ def query(q: str, a1: str = "", a2: str = "", a3: str = ""):
             return str(None)
 
     elif q == "branch_states":
-        c = dt.cur(True)
+        c = cur(True)
         c.execute("SELECT id FROM symbol WHERE branch = '" + a1 + "'")
         got = list(c)
-        dt.cur(False)
+        cur(False)
         load = list()
         for s in got:
             tfs = dict()
@@ -358,11 +357,11 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         global fetching
         if fetching: return "already"
         fetching = True
-        c = dt.cur(True)
+        c = cur(True)
         for k, v in fn.required_tables.items():
             c.execute("DROP TABLE IF EXISTS " + k)
             c.execute("CREATE TABLE " + k + " " + v)
-        dt.cur(False)
+        cur(False)
 
         # TABLE symbol
         fetch = list(tse.all_symbols())
@@ -375,10 +374,10 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             else:
                 inf = None  # if the Mofid server is off, this will be returned!!!
             sym.append((s, inf))
-        c = dt.cur(True)
+        c = cur(True)
         c.executemany("INSERT INTO symbol (name, info) VALUES (%s, %s)", sym)
         dt.connect.commit()
-        dt.cur(False)
+        cur(False)
         fetching = False
         return "symbols_done"
 
@@ -390,17 +389,17 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         return "started"
 
     elif q == "reset":
-        c = dt.cur(True)
+        c = cur(True)
         try:
             for rt in fn.required_tables.keys():
                 c.execute("DROP TABLE IF EXISTS " + rt)
         except:
             return "aborted"
-        dt.cur(False)
+        cur(False)
         return "done"
 
     elif q == "check":
-        c = dt.cur(True)
+        c = cur(True)
         c.execute("SELECT auto FROM symbol WHERE id='" + a1 + "' LIMIT 1")
         try:
             stat = c.fetchone()[0]  # int
@@ -415,7 +414,7 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
             binary = "".join(binary)
         c.execute("UPDATE symbol SET auto = '" + str(int(binary, 2)) + "' WHERE id='" + a1 + "'")
         dt.connect.commit()
-        dt.cur(False)
+        cur(False)
         return binary
 
     elif q == "analyze":
@@ -442,10 +441,10 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         global updating
         if updating: return "already"
         updating = True
-        c = dt.cur(True)
+        c = cur(True)
         c.execute("SHOW TABLES")
         tbs = fn.tables(c)
-        dt.cur(False)
+        cur(False)
         for tb in tbs:
             if tb not in fn.required_tables:
                 update_table(tb)
@@ -453,20 +452,20 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         return "saved"
 
     elif q == "update_symbol":
-        c = dt.cur(True)
+        c = cur(True)
         c.execute("SHOW TABLES")
         tbs = fn.tables(c)
-        dt.cur(False)
+        cur(False)
         for tb in tbs:
             if tb.startswith(str(a1) + "_"):
                 update_table(tb)
         return "saved"
 
     elif q == "update_table":
-        c = dt.cur(True)
+        c = cur(True)
         c.execute("SHOW TABLES")
         tbs = fn.tables(c)
-        dt.cur(False)
+        cur(False)
         tb = str(a1) + "_" + dt.config["timeframes"][int(a2)]["name"].lower()
         if tb in tbs: update_table(tb)
         return "saved"
@@ -493,6 +492,24 @@ def update_table(tb: str):
                       datetime.fromtimestamp(int(last)), fn.when_s_utc())
 
 
+# noinspection PyGlobalUndefined
+def cur(b):
+    global c, connect
+    if b:
+        while True:
+            try:
+                c
+            except NameError:
+                c = connect.cursor()
+                return c
+            else:
+                sleep(2)
+    elif isinstance(c, sqlite3.Cursor):
+        c.close()
+        del c
+
+
+connect = sqlite3.connect(dt.db_name)
 fetching = False
 classifier = None
 updating = False

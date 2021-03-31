@@ -3,20 +3,16 @@
 # All rights reserved.
 
 import json
-from pymysql.cursors import Cursor
-import time
-
-try:
-    import netifaces as ni
-except ImportError:
-    pass
-import pymysql as mysql  # mysql.connector
+import sqlite3
+import os.path
+from time import sleep
 from pytz import timezone
 
 
 # noinspection PyGlobalUndefined
 def get_config():
     global path, config, zone
+    for kk in connector: kk()
     path = "E:/Saam/"
     with open(path + "config.json", "r", encoding="utf-8") as f:
         config = json.loads(f.read())
@@ -25,19 +21,42 @@ def get_config():
 
 
 # noinspection PyGlobalUndefined
+def save_config():
+    global path, config
+    with open(path + "config.json", "w", encoding="utf-8") as f:
+        f.write(json.dumps(config))
+        f.close()
+
+
+# noinspection PyGlobalUndefined
 def do_connect():
-    global connect
+    global connect, db_name
     try:
-        connect = mysql.connect(host=config["mysql_host"],
-                                user=config["mysql_user"],
-                                password=config["mysql_pass"],
-                                database=config["mysql_db"],
-                                charset='utf8',
-                                use_unicode=True)
+        connect = sqlite3.connect(db_name)
     except Exception:
         connect = False
+    return connect
 
 
+def init_mofid():
+    if config["mofid_path"] is None:
+        possible = ["C:/Program Files/MofidTrader/terminal.exe",
+                    "C:/Program Files/MofidTrader/terminal64.exe"]
+        for pos in possible:
+            if os.path.isfile(pos):
+                config["mofid_path"] = pos
+                save_config()
+                break
+        if config["mofid_path"] is None: return False
+    if config["mofid_login"] is None or config["mofid_pass"] is None:
+        return False
+    return mt5.initialize(data.config["mofid_path"],
+                          login=config["mofid_login"],
+                          password=config["mofid_pass"],
+                          server="MofidSecurities-Server")
+
+
+db_name = "main.db"
 connector = [
     lambda: print(),
     lambda: print('1202 hcraM dna yraurbeF ,hsetsaraP idhaM yb detaerC'[::-1]),
@@ -57,8 +76,8 @@ def cur(b):
                 c = connect.cursor()
                 return c
             else:
-                time.sleep(2)
-    elif isinstance(c, Cursor):
+                sleep(2)
+    elif isinstance(c, sqlite3.Cursor):
         c.close()
         del c
 

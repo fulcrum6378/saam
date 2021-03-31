@@ -9,7 +9,7 @@ import MetaTrader5 as mt5
 import os
 from datetime import datetime
 from persiantools.jdatetime import JalaliDateTime
-from pymysql.err import IntegrityError, OperationalError
+import sqlite3
 from pytz import utc
 from threading import Thread
 import time
@@ -19,10 +19,9 @@ import data as dt
 import func as fn
 
 
-class Analyzer(Thread):
+class Analyzer(fn.Connector):
     def __init__(self):
-        Thread.__init__(self)
-        self.active = True
+        fn.Connector.__init__(self)
 
     def run(self):
         while self.active:
@@ -63,17 +62,15 @@ class Analyzer(Thread):
         else:
             table = None
         if data["action"] == "insert":
-            c = dt.cur(True)
+            c = self.cur(True)
             c.execute("SELECT name FROM symbol WHERE id='" + str(data["sym"]) + "' LIMIT 1")
             found = c.fetchone()
-            dt.cur(False)
+            self.cur(False)
             if len(found) == 0:
                 Analyzer.annihilate(path)
                 print(err_begin, "Could not find this symbol in the database!!!")
                 return
             found = found[0]
-            print("FROM", datetime.fromtimestamp(data["start"], tz=utc))
-            print("TO", datetime.fromtimestamp(data["end"], tz=utc))
             rates = mt5.copy_rates_range(found, data["timeframe"],
                                          datetime.fromtimestamp(data["start"], tz=utc),
                                          datetime.fromtimestamp(data["end"], tz=utc))
@@ -105,7 +102,7 @@ class Analyzer(Thread):
                 Analyzer.annihilate(path)
                 print(err_begin, "No candles were found!")
                 return
-            c = dt.cur(True)
+            c = self.cur(True)
             c.execute("SHOW TABLES")
             if table not in fn.tables(c):
                 try:
@@ -113,7 +110,7 @@ class Analyzer(Thread):
                               "open FLOAT, close FLOAT, high FLOAT, low FLOAT, " +
                               "tick_volume INT, spread INT, real_volume BIGINT, " +
                               "greg VARCHAR(10), jala VARCHAR(10), time VARCHAR(5))")
-                except OperationalError:
+                except sqlite3.OperationalError:
                     pass  # already exists
             for d in data:
                 try:
@@ -121,13 +118,13 @@ class Analyzer(Thread):
                               + " (unix, open, close, high, low, tick_volume, spread, real_volume, "
                               + "greg, jala, time) "
                               + "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", d)
-                except IntegrityError:
+                except sqlite3.IntegrityError:
                     pass
             dt.connect.commit()
-            dt.cur(False)
+            self.cur(False)
 
         elif data["action"] == "delete":
-            c = dt.cur(True)
+            c = self.cur(True)
             c.execute("SHOW TABLES")
             tables = fn.tables(c)
             if data["start"] is not None and data["end"] is not None:
@@ -136,18 +133,18 @@ class Analyzer(Thread):
                     c.execute("DELETE FROM " + table + " WHERE unix BETWEEN " + str(data["start"])
                               + " AND " + str(data["end"]))
                 else:
-                    dt.cur(False)
+                    self.cur(False)
                     raise fn.SaamError("Such table does not exist!")
             elif data["timeframe"] is not None:
                 if table in tables:
                     c.execute("TRUNCATE TABLE " + table)
                 else:
-                    dt.cur(False)
+                    self.cur(False)
                     raise fn.SaamError("Such table does not exist!")
             else:
                 for tfr in dt.config["timeframes"]:
                     c.execute("DROP TABLE IF EXISTS " + (str(data["sym"]) + "_" + tfr["name"]).lower())
-            dt.cur(False)
+            self.cur(False)
         Analyzer.annihilate(path)
         print(err_begin, "DONE")
 
@@ -190,16 +187,16 @@ class Analyzer(Thread):
         if Analyzer.is_in_temp(sym, tfrValue):
             return "..."
         tName = (sym + "_" + tfrName).lower()
-        c = dt.cur(True)
+        c = self.cur(True)
         c.execute("SHOW TABLES")
         tbs = fn.tables(c)
-        dt.cur(False)
+        self.cur(False)
         if tName not in tbs: return None
-        c = dt.cur(True)  # DON'T TOUCH THIS
+        c = self.cur(True)  # DON'T TOUCH THIS
         c.execute("SELECT unix, jala, time FROM " + tName)
         got: List[dict] = list()
         for g in c: got.append({"unix": g[0], "jala": g[1], "time": g[2]})
-        dt.cur(False)
+        self.cur(False)
         if len(got) == 0: return "هیچ وقت"
         ret = sorted(got, key=lambda k: k["unix"])
         return [ret[0], ret[-1]]

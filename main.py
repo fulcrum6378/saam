@@ -4,47 +4,28 @@
 
 import MetaTrader5 as mt5
 import simple_http_server.server as server
+import webbrowser
 
 import data
 
-for kk in data.connector: kk()
-print("Connecting to MofidTrader...")
 data.get_config()
-if not mt5.initialize(data.config["mofid_path"],
-                      login=data.config["mofid_login"],
-                      password=data.config["mofid_pass"],
-                      server=data.config["mofid_server"]):
-    print("Could not connect to MofidTrader!!")
-    quit()
-print("DONE!")
 
-print("Connecting to MySQL...")
-data.do_connect()
-if not data.connect:
-    print("Could not connect to MySQL!!")
-    print(data.connect)
-    quit()
-print("DONE!")
+import analyze, watch
 
-import analyze
-import watch
-
-print("Initializing background threads...")
+print("SQLite:", data.do_connect())
+print("Mofid:", data.init_mofid())
 data.init_analyzer(analyze.Analyzer())
 data.init_watcher(watch.Watcher())
-print("DONE")
 
-print("Initializing local server...")
 try:
-    import netifaces as ni
+    from netifaces import ifaddresses
 
-    my_ip = ni.ifaddresses(ni.gateways()['default'][ni.AF_INET][1])[ni.AF_INET][0]['addr']
+    my_ip = ifaddresses(ni.gateways()['default'][ni.AF_INET][1])[ni.AF_INET][0]['addr']
 except:
-    my_ip = "192.168.1.6"  # 127.0.0.1
-
-print("\nhttp://" + str(my_ip) + ":1399/\n")
+    my_ip = input("Please enter your device's IP address:")
+webbrowser.open("http://" + str(my_ip) + ":1399/")
 try:
-    server.scan("", r".*controller.*")
+    server.scan("", "controller.py")
     server.start(host=my_ip, port=1399)
 except Exception as e:
     if str(e) == "[WinError 10022] Windows Error 0x2726":

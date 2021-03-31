@@ -12,13 +12,12 @@ from typing import List
 from analyze import Analyzer
 import data as dt
 import func as fn
-from func import update_time
+from func import Connector, update_time
 
 
-class Watcher(Thread):
+class Watcher(Connector):
     def __init__(self):
-        Thread.__init__(self)
-        self.active = True
+        Connector.__init__(self)
         self.time = 0
         self.last_update = None
 
@@ -86,10 +85,10 @@ class Watcher(Thread):
                 continue
 
             # Check if it's installed
-            c = dt.cur(True)
+            c = self.cur(True)
             c.execute("SELECT id, auto FROM symbol WHERE auto > 0")
             auto = list(c)
-            dt.cur(False)
+            self.cur(False)
 
             # When the Stock Market is open
             if Watcher.stock_open(now):
