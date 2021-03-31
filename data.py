@@ -32,7 +32,7 @@ def save_config():
 def do_connect():
     global connect, db_name
     try:
-        connect = sqlite3.connect(db_name)
+        connect = sqlite3.connect(db_name, check_same_thread=False)
     except Exception:
         connect = False
     return connect

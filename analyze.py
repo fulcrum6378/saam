@@ -19,9 +19,10 @@ import data as dt
 import func as fn
 
 
-class Analyzer(fn.Connector):
+class Analyzer(Thread):
     def __init__(self):
-        fn.Connector.__init__(self)
+        Thread.__init__(self)
+        self.active = True
 
     def run(self):
         while self.active:
@@ -62,10 +63,10 @@ class Analyzer(fn.Connector):
         else:
             table = None
         if data["action"] == "insert":
-            c = self.cur(True)
+            c = dt.cur(True)
             c.execute("SELECT name FROM symbol WHERE id='" + str(data["sym"]) + "' LIMIT 1")
             found = c.fetchone()
-            self.cur(False)
+            dt.cur(False)
             if len(found) == 0:
                 Analyzer.annihilate(path)
                 print(err_begin, "Could not find this symbol in the database!!!")
@@ -102,7 +103,7 @@ class Analyzer(fn.Connector):
                 Analyzer.annihilate(path)
                 print(err_begin, "No candles were found!")
                 return
-            c = self.cur(True)
+            c = dt.cur(True)
             c.execute("SHOW TABLES")
             if table not in fn.tables(c):
                 try:
@@ -121,10 +122,10 @@ class Analyzer(fn.Connector):
                 except sqlite3.IntegrityError:
                     pass
             dt.connect.commit()
-            self.cur(False)
+            dt.cur(False)
 
         elif data["action"] == "delete":
-            c = self.cur(True)
+            c = dt.cur(True)
             c.execute("SHOW TABLES")
             tables = fn.tables(c)
             if data["start"] is not None and data["end"] is not None:
@@ -133,18 +134,18 @@ class Analyzer(fn.Connector):
                     c.execute("DELETE FROM " + table + " WHERE unix BETWEEN " + str(data["start"])
                               + " AND " + str(data["end"]))
                 else:
-                    self.cur(False)
+                    dt.cur(False)
                     raise fn.SaamError("Such table does not exist!")
             elif data["timeframe"] is not None:
                 if table in tables:
                     c.execute("TRUNCATE TABLE " + table)
                 else:
-                    self.cur(False)
+                    dt.cur(False)
                     raise fn.SaamError("Such table does not exist!")
             else:
                 for tfr in dt.config["timeframes"]:
                     c.execute("DROP TABLE IF EXISTS " + (str(data["sym"]) + "_" + tfr["name"]).lower())
-            self.cur(False)
+            dt.cur(False)
         Analyzer.annihilate(path)
         print(err_begin, "DONE")
 
@@ -187,16 +188,16 @@ class Analyzer(fn.Connector):
         if Analyzer.is_in_temp(sym, tfrValue):
             return "..."
         tName = (sym + "_" + tfrName).lower()
-        c = self.cur(True)
+        c = dt.cur(True)
         c.execute("SHOW TABLES")
         tbs = fn.tables(c)
-        self.cur(False)
+        dt.cur(False)
         if tName not in tbs: return None
-        c = self.cur(True)  # DON'T TOUCH THIS
+        c = dt.cur(True)  # DON'T TOUCH THIS
         c.execute("SELECT unix, jala, time FROM " + tName)
         got: List[dict] = list()
         for g in c: got.append({"unix": g[0], "jala": g[1], "time": g[2]})
-        self.cur(False)
+        dt.cur(False)
         if len(got) == 0: return "هیچ وقت"
         ret = sorted(got, key=lambda k: k["unix"])
         return [ret[0], ret[-1]]

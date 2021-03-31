@@ -6,20 +6,20 @@ import pytse_client as tse
 from threading import Thread
 
 import data as dt
-from func import Connector
 
 
-class Classify(Connector):
+class Classify(Thread):
     def __init__(self):
-        Connector.__init__(self)
+        Thread.__init__(self)
+        self.active = True
         self.install_progress = 0
 
     def run(self):
-        c = self.cur(True)
+        c = dt.cur(True)
         c.execute("SELECT * FROM symbol")  # gives the same tuple you inserted.
         symbols = list()  # list of tuples
         for i in c: symbols.append(i)
-        self.cur(False)
+        dt.cur(False)
 
         sum_all = len(symbols)
         for s in range(len(symbols)):  # never change global statements inside a loop
@@ -32,7 +32,7 @@ class Classify(Connector):
             print("Classifying symbol", s, "of", sum_all)
 
             # Check if it exists in 'branch'
-            c = self.cur(True)
+            c = dt.cur(True)
             c.execute("SELECT * FROM branch WHERE name='" + branch + "' LIMIT 1")
             exists = list()
             for i in c: exists.append(i)
@@ -46,5 +46,5 @@ class Classify(Connector):
             # Update symbol
             c.execute("UPDATE symbol SET branch='" + str(branch_id) + "' WHERE name='" + symbol_name + "'")
             dt.connect.commit()
-            self.cur(False)
+            dt.cur(False)
         self.active = False

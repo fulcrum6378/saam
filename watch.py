@@ -5,6 +5,7 @@
 from datetime import datetime, timedelta
 import MetaTrader5 as mt5
 from pytz import timezone, utc
+from sqlite3 import OperationalError
 from threading import Thread
 from time import sleep
 from typing import List
@@ -12,12 +13,13 @@ from typing import List
 from analyze import Analyzer
 import data as dt
 import func as fn
-from func import Connector, update_time
+from func import update_time
 
 
-class Watcher(Connector):
+class Watcher(Thread):
     def __init__(self):
-        Connector.__init__(self)
+        Thread.__init__(self)
+        self.active = True
         self.time = 0
         self.last_update = None
 
@@ -85,10 +87,14 @@ class Watcher(Connector):
                 continue
 
             # Check if it's installed
-            c = self.cur(True)
-            c.execute("SELECT id, auto FROM symbol WHERE auto > 0")
-            auto = list(c)
-            self.cur(False)
+            try:
+                c = dt.cur(True)
+                c.execute("SELECT id, auto FROM symbol WHERE auto > 0")
+                auto = list(c)
+                dt.cur(False)
+            except OperationalError:
+                sleep(30)
+                continue
 
             # When the Stock Market is open
             if Watcher.stock_open(now):
