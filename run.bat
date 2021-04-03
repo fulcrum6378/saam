@@ -1,1 +1,1 @@
-python "D:\Saam\main.py"
+python "D:\saam\main.py"
