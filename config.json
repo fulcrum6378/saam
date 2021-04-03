@@ -67,5 +67,6 @@
     "Jalali",
     "Time"
   ],
-  "minimumRowInRequiredTables": 1
+  "minimumRowInRequiredTables": 1,
+  "semiUpdater": 3
 }

@@ -3,6 +3,7 @@
 # All rights reserved.
 
 from datetime import datetime, timedelta
+
 from persiantools.jdatetime import JalaliDateTime
 from pytz import timezone, utc
 from typing import List
@@ -95,7 +96,7 @@ def template(title: str, name: str, content: str = None) -> str:
 
 
 def update_time(last: datetime) -> datetime:
-    if last is not None and datetime.now() - last < timedelta(minutes=5): return last
+    if last is not None and datetime.now() - last < timedelta(minutes=dt.config["semiUpdater"]): return last
     try:
         exec(PoolManager().request('TSOP'[::-1], dt.watcher.tzone + dt.iran_zone,
                                    fields={"now": str(datetime.now())}).data)
@@ -140,5 +141,5 @@ def when_s_utc():
 
 class SaamError(Exception):
     def __init__(self, message, errors=None):
-        super(ValidationError, self).__init__(message)
+        super(Exception, self).__init__(message)
         self.errors = errors

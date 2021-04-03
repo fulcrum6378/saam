@@ -22,4 +22,4 @@ try:
     server.scan("", r".*controller.*")
     server.start(host=my_ip, port=1399)
 except Exception as e:
-    print("ERROR STARTING SERVER: ", e)
+    print("ERROR STARTING SERVER:", e)
