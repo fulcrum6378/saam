@@ -14,7 +14,7 @@ from time import sleep
 def get_config():
     global path, config, zone
     for kk in connector: kk()
-    path = "E:/Saam/"
+    path = os.path.realpath(__file__)[:-7].replace("\\", "/")
     with open(path + "config.json", "r", encoding="utf-8") as f:
         config = json.loads(f.read())
         f.close()

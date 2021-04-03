@@ -67,13 +67,13 @@ def template(title: str, name: str, content: str = None) -> str:
     htm += '<!-- GitHub: https://github.com/fulcrum1378 -->\n'
     htm += '<!-- LinkedIn: https://www.linkedin.com/in/mahdi-parastesh-a72ab51b9/ -->\n'
     htm += '<!-- All rights reserved. -->\n\n'
-    with open("./html/temp.html", "r", encoding="utf-8") as f:
+    with open(dt.path + "html/temp.html", "r", encoding="utf-8") as f:
         htm += f.read()
         f.close()
     htm = htm.replace('<title />', '<title>' + title + '</title>')
     htm = htm.replace('<link />', '<link rel="stylesheet" type="text/css" href="./html/' + name + '.css">')
     if content is None:
-        with open("./html/" + name + ".html", "r", encoding="utf-8") as f:
+        with open(dt.path + "html/" + name + ".html", "r", encoding="utf-8") as f:
             htm = htm.replace('<body />', f.read())
             f.close()
     else:
@@ -92,7 +92,7 @@ def update_time(last: datetime) -> datetime:
 
 
 def header(title: str = "سام"):
-    with open("./html/header.html", "r", encoding="utf-8") as f:
+    with open(dt.path + "html/header.html", "r", encoding="utf-8") as f:
         htm = f.read()
         f.close()
     htm = htm.replace('{title}', title)

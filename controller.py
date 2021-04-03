@@ -23,7 +23,7 @@ def index():
     if not dt.mofid:
         data = "<body>\n"
         data += fn.header("ورود به مفید تریدر")
-        with open("./html/login.html", "r", encoding="utf-8") as f:
+        with open(dt.path + "html/login.html", "r", encoding="utf-8") as f:
             data += f.read()
             f.close()
         data += '<script type="text/javascript" src="./html/login.js"></script>\n'
@@ -61,7 +61,7 @@ def index():
             status = "no"
 
     if status == "no":
-        with open("./html/installing.html", "r", encoding="utf-8") as f:
+        with open(dt.path + "html/installing.html", "r", encoding="utf-8") as f:
             installing = f.read()
             f.close()
         htm = fn.template("سام: راه اندازی", "install")
@@ -98,7 +98,7 @@ def index():
     elif status == "installing":
         data = '<body>\n'
         data += '<center id="installer">\n'
-        with open("./html/installing.html", "r", encoding="utf-8") as f:
+        with open(dt.path + "html/installing.html", "r", encoding="utf-8") as f:
             data += f.read().replace(" invisible", "") + '\n'
             f.close()
         data += '</center>\n'
@@ -313,7 +313,7 @@ def image(path_val=PathValue()):
 
 @request_map("/html/{path_val}")
 def html(path_val=PathValue()):
-    with open("./html/" + path_val, "r", encoding="utf-8") as f:
+    with open(dt.path + "html/" + path_val, "r", encoding="utf-8") as f:
         read = f.read()
         f.close()
     ext = path_val[(path_val.rfind(".") + 1):]
