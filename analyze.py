@@ -2,7 +2,6 @@
 # LinkedIn: https://www.linkedin.com/in/mahdi-parastesh-a72ab51b9/
 # All rights are reserved.
 
-from datetime import datetime
 import json
 from json.decoder import JSONDecodeError
 import MetaTrader5 as mt5
@@ -59,7 +58,7 @@ class Analyzer(Thread):
         data["state"] = 1
         Analyzer.save_temp(path, data)
         if data["timeframe"] is not None:
-            table = (str(data["sym"]) + "_" + fn.tf_name(data["timeframe"])).lower()
+            table = ("s" + str(data["sym"]) + "_" + fn.tf_name(data["timeframe"])).lower()
         else:
             table = None
         if data["action"] == "insert":
@@ -144,7 +143,7 @@ class Analyzer(Thread):
                     raise fn.SaamError("Such table does not exist!")
             else:
                 for tfr in dt.config["timeframes"]:
-                    c.execute("DROP TABLE IF EXISTS " + (str(data["sym"]) + "_" + tfr["name"]).lower())
+                    c.execute("DROP TABLE IF EXISTS " + ("s" + str(data["sym"]) + "_" + tfr["name"]).lower())
             dt.cur(False)
         Analyzer.annihilate(path)
         print(err_begin, "DONE")
@@ -187,7 +186,7 @@ class Analyzer(Thread):
     def since_until_main(sym, tfrName, tfrValue):
         if Analyzer.is_in_temp(sym, tfrValue):
             return "..."
-        tName = (sym + "_" + tfrName).lower()
+        tName = ("s" + sym + "_" + tfrName).lower()
         c = dt.cur(True)
         c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
         tbs = fn.tables(c)

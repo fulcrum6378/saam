@@ -5,8 +5,6 @@
 from datetime import datetime, timedelta
 from persiantools.jdatetime import JalaliDateTime
 from pytz import timezone, utc
-import sqlite3
-from threading import Thread
 from typing import List
 from urllib3 import PoolManager
 
@@ -18,12 +16,27 @@ required_tables = {  # NEVER USE 'desc' or 'group' AS TABLE NAME
               + "branch INTEGER DEFAULT '-1', auto SMALLINT DEFAULT '0')",
     "branch": "(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(150))"
 }
-
-
-def sql_esc(msg):
-    msg = msg.replace('\"', '\\"')
-    msg = msg.replace("\'", "\\'")
-    return msg
+all_timeframes = [{"value": 1, "name": "M1", "visName": "M1"},
+                  {"value": 2, "name": "M2", "visName": "M2"},
+                  {"value": 3, "name": "M3", "visName": "M3"},
+                  {"value": 4, "name": "M4", "visName": "M4"},
+                  {"value": 5, "name": "M5", "visName": "M5"},
+                  {"value": 6, "name": "M6", "visName": "M6"},
+                  {"value": 10, "name": "M10", "visName": "M10"},
+                  {"value": 12, "name": "M12", "visName": "M12"},
+                  {"value": 15, "name": "M15", "visName": "M15"},
+                  {"value": 20, "name": "M30", "visName": "M20"},
+                  {"value": 30, "name": "M30", "visName": "M30"},
+                  {"value": 16385, "name": "H1", "visName": "H1"},
+                  {"value": 16386, "name": "H2", "visName": "H2"},
+                  {"value": 16387, "name": "H3", "visName": "H3"},
+                  {"value": 16388, "name": "H4", "visName": "H4"},
+                  {"value": 16390, "name": "H6", "visName": "H6"},
+                  {"value": 16392, "name": "H8", "visName": "H8"},
+                  {"value": 16396, "name": "H12", "visName": "H12"},
+                  {"value": 16408, "name": "D1", "visName": "D1"},
+                  {"value": 32769, "name": "W1", "visName": "W1"},
+                  {"value": 49153, "name": "MN1", "visName": "MN"}]
 
 
 def tables(c) -> List[str]:
@@ -102,18 +115,19 @@ def header(title: str = "سام"):
 def persian_board(board: str):
     try:
         got = board.split(" - ")
-        spl1 = got[0].split(dt.config["dateSeparator"])
-        spl2 = got[1].split(dt.config["dateSeparator"])
-        tim1 = spl1[3].split(dt.config["timeSeparator"])
-        tim2 = spl2[3].split(dt.config["timeSeparator"])
-        a = JalaliDateTime(int(spl1[0]), int(spl1[1]), int(spl1[2]), int(tim1[0]), int(tim1[1]), 0)
-        b = JalaliDateTime(int(spl2[0]), int(spl2[1]), int(spl2[2]), int(tim2[0]), int(tim2[1]), 0)
-        a = a.to_gregorian()
-        b = b.to_gregorian()
+        a = persian_date(got[0])
+        b = persian_date(got[1])
     except:
         return None
     else:
         return a, b
+
+
+def persian_date(date: str):
+    spl = date.split(dt.config["dateSeparator"])
+    tim = spl[3].split(dt.config["timeSeparator"])
+    return JalaliDateTime(int(spl[0]), int(spl[1]), int(spl[2]), int(tim[0]), int(tim[1]), 0) \
+        .to_gregorian()
 
 
 def when_s_now():

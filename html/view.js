@@ -26,11 +26,18 @@ $("td").click(function() {
 // Resume the current table
 function updateTable() {
     let sym = $("#main").attr("data-symbol"),
-        tfr = $("#main nav .active").index();
+        tfr = $("#main nav .active").index(),
+        addit = "";
+    if ($(".tab-pane.active.show").children().length == 0) {
+        let cal = new SolarHijri(new Date()),
+            def = dateModel(cal);
+        addit = "&a3=" + prompt("از چه زمانی؟", def);
+        if (addit == null || addit == "" || addit == "&a3=") return;
+    }
     $.ajax({
-        url: "/action?q=update_table&a1=" + sym + "&a2=" + tfr,
+        url: "/action?q=update_table&a1=" + sym + "&a2=" + tfr + addit,
         context: document.body,
-        timeout: 10000
+        timeout: 5000
     }).done(function(data) {
         switch (data) {
             case "saved":

@@ -7,7 +7,7 @@ import json
 import MetaTrader5 as mt5
 import os
 from persiantools.jdatetime import JalaliDateTime
-from sqlite3 import ProgrammingError
+from sqlite3 import OperationalError
 import pytse_client as tse
 import signal
 from simple_http_server import request_map, PathValue, Headers, StaticFile
@@ -73,6 +73,7 @@ def index():
         data += '<ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="settings">\n' \
                 + '    <li class="dropdown-item" onclick="updateAll();">ازسرگیری کلی</li>\n' \
                 + '    <li class="dropdown-item" onclick="reset();">نصب و راه اندازی مجدد</li>\n' \
+                + '    <li class="dropdown-item" onclick="settings();">تنظیمات</li>\n' \
                 + '    <li class="dropdown-item" onclick="shutdown();">خاموش</li>\n' \
                 + '</ul>\n'
         data += '<img src="./html/img/search_1.png" class="fixedIcon" id="search" onclick="search();">'
@@ -155,8 +156,8 @@ def branch(i: str, found: str = None):
         data += '    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="' + tid + '">\n' \
                 + '        <li><a class="dropdown-item" href="/view?i=' + str(s["i"]) + '">' \
                 + 'نمایش تمام کندل ها' + '</a></li>\n' \
-                + '        <li><a class="dropdown-item" href="#" onclick="resumeSymbol(' + str(s["i"]) + ');">' \
-                + 'ازسرگیری تمام تایم فریم ها' + '</a></li>\n' \
+                + '        <li><a class="dropdown-item" href="#" onclick="resumeSymbol(' \
+                + str(s["i"]) + ');">' + 'ازسرگیری تمام تایم فریم ها' + '</a></li>\n' \
                 + '    </ul>\n'
         data += '</div>\n'
         data += '<div class="overflow" style="display: none;" id="ovf_' + str(s["i"]) + '">\n'
@@ -165,8 +166,9 @@ def branch(i: str, found: str = None):
             data += '    <p onclick="tfClick(' + str(t["value"]) + ', ' + str(s["i"]) + ', this);" ' \
                     + 'class="' + t["name"] + '">' \
                     + '<input class="form-check-input chk_sym" type="checkbox" ' \
-                    + 'data-symbol="' + str(s["i"]) + '" data-frame="' + str(tf.index(t)) + '"' + tf_checked + '>\n' \
-                    + '<label>' + str(t["visName"]) + '</label><span>' + s["z"][t["name"]] + '</span></p>\n'
+                    + 'data-symbol="' + str(s["i"]) + '" data-frame="' + str(tf.index(t)) + '"' \
+                    + tf_checked + '>\n' + '<label>' + str(t["visName"]) \
+                    + '</label><span>' + s["z"][t["name"]] + '</span></p>\n'
         data += '</div>\n'
     data += '</center>\n'
     data += '<input type="hidden" id="timeSeparator" value="' + dt.config["timeSeparator"] + '">\n'
@@ -220,13 +222,13 @@ def view(i: str):
         if t == tf[0]: active = ' show active'
         data += '    <div class="tab-pane table-responsive fade' + active + '" id="nav-' + t["name"] + '" ' \
                 + 'role="tabpanel" aria-labelledby="nav-' + t["name"] + '-tab">\n'
-        tName = str(i) + "_" + t["name"]
+        tName = ("s" + str(i) + "_" + t["name"]).lower()
         c = dt.cur(True)
         got = None
         try:
             c.execute("SELECT * FROM " + tName)
             got = list(c)
-        except ProgrammingError:
+        except OperationalError:
             pass
         dt.cur(False)
         length = str(len(got)) if got is not None else "0"
@@ -291,6 +293,31 @@ def search():
     data += '<script type="text/javascript" src="./html/search.js"></script>\n'
     data += "</body>"
     htm = fn.template("سام: جستجو", "search", data)
+    return 200, Headers({"Content-Type": "text/html"}), htm
+
+
+@request_map("/settings")
+def settings():
+    data = "<body>\n"
+    data += fn.header("تنظیمات")
+    data += '<center id="main">\n'
+    data += '<div id="settings">\n'
+    data += '    <ul class="list-group">\n'
+    for tfr in fn.all_timeframes:
+        checked = ""
+        for ctf in dt.config["timeframes"]:
+            if tfr["name"] == ctf["name"]:
+                checked = " checked"
+        data += '        <label class="form-check-label text-light" for="check_' + tfr["name"] + '">' \
+                + '<li class="list-group-item list-group-item-action list-group-item-dark">' \
+                + '<input class="form-check-input" type="checkbox" value="" id="check_' + tfr["name"] + '"' \
+                + checked + '><span>' + tfr["visName"] + '<span></li></label>\n'
+    data += '    </ul>\n'
+    data += '</div>\n'
+    data += '</center>\n'
+    data += '<script type="text/javascript" src="./html/settings.js"></script>\n'
+    data += "</body>"
+    htm = fn.template("سام: تنظیمات", "settings", data)
     return 200, Headers({"Content-Type": "text/html"}), htm
 
 
@@ -477,18 +504,35 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         tbs = fn.tables(c)
         dt.cur(False)
         for tb in tbs:
-            if tb.startswith(str(a1) + "_"):
+            if tb.startswith("s" + str(a1) + "_"):
                 update_table(tb)
         return "saved"
 
     elif q == "update_table":
-        c = dt.cur(True)
-        c.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
-        tbs = fn.tables(c)
-        dt.cur(False)
-        tb = str(a1) + "_" + dt.config["timeframes"][int(a2)]["name"].lower()
-        if tb in tbs: update_table(tb)
+        since = None
+        if a3 != "":
+            try:
+                since = fn.persian_date(a3)
+            except:
+                return "invalid date"
+        tb = "s" + str(a1) + "_" + dt.config["timeframes"][int(a2)]["name"].lower()
+        update_table(tb, since)
         return "saved"
+
+    elif q == "change_timeframe":
+        which = -1
+        for tfr in range(len(dt.config["timeframes"])):
+            if dt.config["timeframes"][tfr]["name"] == a1:
+                which = tfr
+        if which != -1:
+            dt.config["timeframes"].pop(which)
+        else:
+            for ctf in fn.all_timeframes:
+                if ctf["name"] == a1:
+                    dt.config["timeframes"].append(ctf)
+            dt.config["timeframes"] = sorted(dt.config["timeframes"], key=lambda i: i['value'])
+        dt.save_config()
+        return str(not (which != -1))
 
     elif q == "shutdown":
         mt5.shutdown()
@@ -499,17 +543,18 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         return 500
 
 
-def update_table(tb: str):
-    arg = tb.split("_")
+def update_table(tb: str, since: datetime = None):
+    arg = tb[1:].split("_")
     tfrVal = None
     for tfr in dt.config["timeframes"]:
         if tfr["name"] == arg[1].upper():
             tfrVal = tfr["value"]
     if tfrVal is None:
         raise fn.SaamError("Unexpected error in finding the timeframe value!!!")
-    last = Analyzer.since_until_main(arg[0], arg[1], tfrVal)[1]["unix"]
-    Analyzer.put_temp(arg[0], tfrVal,
-                      datetime.fromtimestamp(int(last)), fn.when_s_utc())
+    if since is None:
+        since = datetime.fromtimestamp(int(Analyzer.since_until_main(arg[0], arg[1], tfrVal)[1]["unix"]))
+    print(since)
+    Analyzer.put_temp(arg[0], tfrVal, since, fn.when_s_utc())
 
 
 fetching = False

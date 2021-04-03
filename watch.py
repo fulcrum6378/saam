@@ -4,7 +4,7 @@
 
 from datetime import datetime, timedelta
 import MetaTrader5 as mt5
-from pytz import timezone, utc
+from pytz import utc
 from sqlite3 import OperationalError
 from threading import Thread
 from time import sleep

@@ -58,3 +58,6 @@ function shutdown() {
 function search() {
     location.assign(location.href + "search");
 }
+function settings() {
+    location.assign(location.href + "settings");
+}

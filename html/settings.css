@@ -1,0 +1,19 @@
+#settings {
+    width: 40%;
+}
+#settings li {
+    text-align: right;
+}
+#settings label {
+    font-family: sans-serif;
+    font-size: 17px;
+}
+#settings input {
+    margin-left: 15px;
+}
+
+@media only screen and (max-width: 450px) {
+    #settings {
+        width: 85%;
+    }
+}
