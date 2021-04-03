@@ -3,6 +3,7 @@
 # All rights reserved.
 
 import simple_http_server.server as server
+import socket
 import webbrowser
 
 import data
@@ -16,10 +17,14 @@ print("Mofid:", data.init_mofid())
 data.init_analyzer(analyze.Analyzer())
 data.init_watcher(watch.Watcher())
 
-my_ip = input("Please enter your device's IP address:")
+my_ip = socket.gethostbyname(socket.gethostname())
 webbrowser.open("http://" + str(my_ip) + ":1399/")
-try:
-    server.scan("", r".*controller.*")
-    server.start(host=my_ip, port=1399)
-except Exception as e:
-    print("ERROR STARTING SERVER:", e)
+while True:
+    try:
+        server.scan("", r".*controller.*")
+        server.start(host=my_ip, port=1399)
+    except Exception as e:
+        print("ERROR STARTING SERVER:", e)
+        my_ip = input("PLEASE ENTER YOUR CORRECT IP ADDRESS:")
+    else:
+        break

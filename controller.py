@@ -553,7 +553,6 @@ def update_table(tb: str, since: datetime = None):
         raise fn.SaamError("Unexpected error in finding the timeframe value!!!")
     if since is None:
         since = datetime.fromtimestamp(int(Analyzer.since_until_main(arg[0], arg[1], tfrVal)[1]["unix"]))
-    print(since)
     Analyzer.put_temp(arg[0], tfrVal, since, fn.when_s_utc())
 
 

@@ -3,7 +3,6 @@
 # All rights reserved.
 
 from datetime import datetime, timedelta
-
 from persiantools.jdatetime import JalaliDateTime
 from pytz import timezone, utc
 from typing import List
