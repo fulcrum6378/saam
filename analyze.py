@@ -22,6 +22,8 @@ class Analyzer(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.active = True
+        if not os.path.exists('temp'):
+            os.makedirs('temp')
 
     def run(self):
         while self.active:

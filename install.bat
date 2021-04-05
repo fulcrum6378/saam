@@ -1,5 +1,4 @@
 pip install MetaTrader5
-pip install netifaces
 pip install persiantools
 pip install pytse_client
 pip install pytz

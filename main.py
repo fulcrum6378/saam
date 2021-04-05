@@ -12,7 +12,7 @@ data.get_config()
 
 import analyze, watch
 
-print("SQLite:", data.do_connect())
+print("SQLite:", data.do_connect() is not None)
 print("Mofid:", data.init_mofid())
 data.init_analyzer(analyze.Analyzer())
 data.init_watcher(watch.Watcher())
