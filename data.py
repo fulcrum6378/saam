@@ -61,17 +61,18 @@ def do_connect():
 # noinspection PyGlobalUndefined
 def init_mofid():
     global mofid, mofid_path
+    mofid_path = None
     mofid = False
-    if config["mofid_path"] is None:
-        possible = ["C:/Program Files/MofidTrader/terminal64.exe",
-                    "C:/Program Files/MofidTrader/terminal.exe",
-                    "C:/Program Files/MetaTrader 5/terminal64.exe",
-                    "C:/Program Files/MetaTrader 5/terminal.exe"]
-        for pos in possible:
-            if os.path.isfile(pos):
-                mofid_path = pos
-                break
-        if config["mofid_path"] is None: return mofid
+    possible = ["C:/Program Files/MofidTrader/terminal64.exe",
+                "C:/Program Files/MofidTrader/terminal.exe",
+                "C:/Program Files/MetaTrader 5/terminal64.exe",
+                "C:/Program Files/MetaTrader 5/terminal.exe"]
+    for pos in possible:
+        if os.path.isfile(pos):
+            mofid_path = pos
+            break
+    if mofid_path is None:
+        raise SaamError("COULD NOT FIND MOFID-TRADER / META-TRADER 5")
     if config["mofid_server"] is None:
         config["mofid_server"] = "MofidSecurities-Server"
         save_config()
@@ -120,3 +121,10 @@ def init_watcher(thread):
     global watcher
     watcher = thread
     watcher.start()
+
+
+class SaamError(Exception):
+    def __init__(self, message, errors=None):
+        super(Exception, self).__init__(message)
+        self.errors = errors
+        sleep(60)

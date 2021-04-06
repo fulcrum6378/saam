@@ -138,13 +138,13 @@ class Analyzer(Thread):
                               + " AND " + str(data["end"]))
                 else:
                     dt.cur(False)
-                    raise fn.SaamError("Such table does not exist!")
+                    raise dt.SaamError("Such table does not exist!")
             elif data["timeframe"] is not None:
                 if table in tables:
                     c.execute("TRUNCATE TABLE " + table)
                 else:
                     dt.cur(False)
-                    raise fn.SaamError("Such table does not exist!")
+                    raise dt.SaamError("Such table does not exist!")
             else:
                 for tfr in dt.config["timeframes"]:
                     c.execute("DROP TABLE IF EXISTS " + ("s" + str(data["sym"]) + "_" + tfr["name"]).lower())

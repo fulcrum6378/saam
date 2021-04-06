@@ -118,7 +118,7 @@ def branch(i: str, found: str = None):
     name = c.fetchone()
     dt.cur(False)
     if len(name) == 0:
-        raise fn.SaamError("گروه موردنظر در پایگاه داده یافت نشد!")
+        raise dt.SaamError("گروه موردنظر در پایگاه داده یافت نشد!")
     name = name[0]
     data = "<body>\n"
     data += fn.header(name)
@@ -186,7 +186,7 @@ def view(i: str):
     name = c.fetchone()
     dt.cur(False)
     if len(name) == 0:
-        raise fn.SaamError("نماد موردنظر در پایگاه داده یافت نشد!"
+        raise dt.SaamError("نماد موردنظر در پایگاه داده یافت نشد!"
                            + " در این مواقع بهتر است «نصب و راه اندازی مجدد» را انجام دهید.")
     name = name[0]
     data = "<body>\n"
@@ -518,7 +518,7 @@ def update_table(tb: str, since: datetime = None):
         if tfr["name"] == arg[1].upper():
             tfrVal = tfr["value"]
     if tfrVal is None:
-        raise fn.SaamError("Unexpected error in finding the timeframe value!!!")
+        raise dt.SaamError("Unexpected error in finding the timeframe value!!!")
     if since is None:
         since = datetime.fromtimestamp(int(Analyzer.since_until_main(arg[0], arg[1], tfrVal)[1]["unix"]))
     Analyzer.put_temp(arg[0], tfrVal, since, fn.when_s_utc())
