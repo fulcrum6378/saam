@@ -6,6 +6,9 @@ $("#installer").fadeOut(1, function() { $(this).removeClass("invisible"); });
 $("#installer").fadeIn(600);
 $("#start").click(function() { classify(); });
 function classify() {
+    $("#installer :nth-child(1)").slideUp(200);
+    $("#installer :nth-child(2)").slideUp(200);
+    $("#start").fadeOut(200, function() { $(this).remove(); });
     $.ajax({
         url: "/action?q=classify",
         context: document.body,
@@ -13,7 +16,6 @@ function classify() {
     }).done(function(data) {
         if (data != "started") alert("FAILED: " + data);
     });
-    $("#loading").slideUp(200);
     $("#installation_progress").fadeOut(1, function() { $(this).removeClass("invisible"); });
     $("#installation_progress").fadeIn(500);
     update();

@@ -42,9 +42,10 @@ class Classify(Thread):
             if len(branch) == 0:
                 print("UNKNOWN SYMBOL!!!", s)
                 continue
+            branch = branch[0]
 
             # TABLE branch
-            c.execute("SELECT * FROM branch WHERE name='" + branch[0] + "' LIMIT 1")
+            c.execute("SELECT * FROM branch WHERE name='" + branch + "' LIMIT 1")
             exists = list()
             for i in c: exists.append(i)
             if len(exists) == 0:

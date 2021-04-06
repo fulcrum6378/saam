@@ -2,6 +2,7 @@
 # Github: https://github.com/fulcrum1378
 # All rights reserved.
 
+
 import simple_http_server.server as server
 import socket
 import webbrowser
@@ -12,10 +13,11 @@ data.get_config()
 
 import analyze, watch
 
-if data.do_connect() is None:
+if not data.isAdmin():
     print("RUN AS ADMINISTRATOR, PLEASE!!!")
     data.freeze()
-print("SQLite: OK")
+
+print("SQLite:", data.do_connect() is not None)
 print("Mofid:", data.init_mofid(), "\n")
 data.init_analyzer(analyze.Analyzer())
 data.init_watcher(watch.Watcher())

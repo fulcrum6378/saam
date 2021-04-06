@@ -2,9 +2,10 @@
 # Github: https://github.com/fulcrum1378
 # All rights reserved.
 
+import ctypes
 import json
 import MetaTrader5 as mt5
-import os.path
+import os, os.path
 from pytz import timezone
 import sqlite3
 from time import sleep
@@ -104,5 +105,13 @@ def init_watcher(thread):
     watcher.start()
 
 
+def isAdmin():
+    try:
+        is_admin = (os.getuid() == 0)
+    except AttributeError:
+        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+    return is_admin
+
+
 def freeze():
-    while True: sleep(10)
+    while True: sleep(60)
