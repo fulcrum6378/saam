@@ -31,11 +31,11 @@ def save_config():
 
 # noinspection PyGlobalUndefined
 def do_connect():
-    global connect
+    global connect, path
     try:
-        connect = sqlite3.connect("main.db", check_same_thread=False)
-    except Exception:
-        connect = False
+        connect = sqlite3.connect(path + "main.db", check_same_thread=False)
+    except:
+        connect = None
     return connect
 
 
@@ -102,3 +102,7 @@ def init_watcher(thread):
     global watcher
     watcher = thread
     watcher.start()
+
+
+def freeze():
+    while True: sleep(10)

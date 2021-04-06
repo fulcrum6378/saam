@@ -12,7 +12,10 @@ data.get_config()
 
 import analyze, watch
 
-print("SQLite:", data.do_connect() is not None)
+if data.do_connect() is None:
+    print("RUN AS ADMINISTRATOR, PLEASE!!!")
+    data.freeze()
+print("SQLite: OK")
 print("Mofid:", data.init_mofid(), "\n")
 data.init_analyzer(analyze.Analyzer())
 data.init_watcher(watch.Watcher())

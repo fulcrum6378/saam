@@ -7,7 +7,6 @@ import json
 import MetaTrader5 as mt5
 import os
 from sqlite3 import OperationalError
-import pytse_client as tse
 import signal
 from simple_http_server import request_map, PathValue, Headers, StaticFile
 
@@ -366,8 +365,6 @@ def query(q: str, a1: str = "", a2: str = "", a3: str = ""):
         global classifier
         if classifier is not None and classifier.active:
             return str(classifier.install_progress)
-        elif fetching:
-            return str(0)
         else:
             return str(None)
 
@@ -398,34 +395,6 @@ def action(q: str, a1: str = "", a2: str = "", a3: str = ""):
         dt.config["mofid_pass"] = a2
         dt.save_config()
         return str(dt.init_mofid())
-
-    elif q == "install":
-        global fetching
-        if fetching: return "already"
-        fetching = True
-        c = dt.cur(True)
-        for k, v in fn.required_tables.items():
-            c.execute("DROP TABLE IF EXISTS " + k)
-            c.execute("CREATE TABLE " + k + " " + v)
-        dt.cur(False)
-
-        # TABLE symbol
-        fetch = list(tse.all_symbols())
-        fetch.sort()
-        sym = list()
-        for s in fetch:
-            got = mt5.symbols_get(s)
-            if got is not None and len(got) > 0:
-                inf = got[0].description
-            else:
-                inf = None  # if the Mofid server is off, this will be returned!!!
-            sym.append((s, inf))
-        c = dt.cur(True)
-        c.executemany("INSERT INTO symbol (name, info) VALUES (?, ?)", sym)
-        dt.connect.commit()
-        dt.cur(False)
-        fetching = False
-        return "symbols_done"
 
     elif q == "classify":
         global classifier
@@ -555,6 +524,5 @@ def update_table(tb: str, since: datetime = None):
     Analyzer.put_temp(arg[0], tfrVal, since, fn.when_s_utc())
 
 
-fetching = False
 classifier = None
 updating = False

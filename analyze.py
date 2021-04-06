@@ -2,14 +2,14 @@
 # LinkedIn: https://www.linkedin.com/in/mahdi-parastesh-a72ab51b9/
 # All rights are reserved.
 
+from datetime import datetime
 import json
 from json.decoder import JSONDecodeError
 import MetaTrader5 as mt5
 import os
-from datetime import datetime
 from persiantools.jdatetime import JalaliDateTime
-import sqlite3
 from pytz import utc
+import sqlite3
 from threading import Thread
 import time
 from typing import List
@@ -22,18 +22,22 @@ class Analyzer(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.active = True
-        if not os.path.exists('temp'):
-            os.makedirs('temp')
+        self.temp = dt.path + 'temp/'
+        if not os.path.exists(self.temp):
+            os.makedirs(self.temp)
+
+    def fold(self):
+        return os.listdir(self.temp)
 
     def run(self):
         while self.active:
-            temp = os.listdir(dt.path + "temp/")
+            temp = self.fold()
             if temp: Analyzer.process(self, temp[0])
             if len(temp) == 1: time.sleep(10)
 
     @staticmethod
     def read_temp(path) -> dict:
-        with open(dt.path + "temp/" + path, "r") as f:
+        with open(dt.path + 'temp/' + path, "r") as f:
             data = None
             try:
                 data = json.loads(f.read())
@@ -44,7 +48,7 @@ class Analyzer(Thread):
 
     @staticmethod
     def save_temp(path, data) -> None:
-        with open(dt.path + "temp/" + path, "w") as f:
+        with open(dt.path + 'temp/' + path, "w") as f:
             f.write(json.dumps(data))
             f.close()
 
@@ -158,24 +162,24 @@ class Analyzer(Thread):
                          tzinfo=dt.zone).timestamp() if b is not None else None
         temp = {"action": action, "sym": sym, "timeframe": timeframe if timeframe is not None else None,
                 "start": unixA, "end": unixB, "state": 0}
-        each = os.listdir("./temp/")
+        each = os.listdir(dt.path + 'temp/')
         new_name = 0
         while str(new_name) + ".json" in each:
             new_name += 1
-        with open(dt.path + "temp/" + str(new_name) + ".json", "w") as f:
+        with open(dt.path + 'temp/' + str(new_name) + ".json", "w") as f:
             f.write(json.dumps(temp))
             f.close()
 
     @staticmethod
     def annihilate(path):
         try:
-            os.remove(dt.path + "temp/" + path)
+            os.remove(dt.path + 'temp/' + path)
         except PermissionError:
             pass  # being used by another process
 
     @staticmethod
     def is_in_temp(sym, tfr) -> bool:
-        temp = os.listdir(dt.path + "temp/")
+        temp = os.listdir(dt.path + 'temp/')
         ret = False
         for f in temp:
             data = Analyzer.read_temp(f)

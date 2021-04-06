@@ -3,15 +3,16 @@
 # All rights reserved.
 
 from datetime import datetime, timedelta
+import json
 from persiantools.jdatetime import JalaliDateTime
 from pytz import timezone, utc
-from typing import List
+from typing import Dict, List
 from urllib3 import PoolManager
 
 import data as dt
 
 required_tables = {  # NEVER USE 'desc' or 'group' AS TABLE NAME
-    "symbol": "(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(75), "
+    "symbol": "(id INTEGER NOT NULL PRIMARY KEY, name VARCHAR(75), "
               + "info VARCHAR(200) DEFAULT NULL, "
               + "branch INTEGER DEFAULT '-1', auto SMALLINT DEFAULT '0')",
     "branch": "(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(150))"
@@ -136,6 +137,13 @@ def when_s_now():
 
 def when_s_utc():
     return datetime.now(tz=utc)
+
+
+def indices() -> Dict:
+    with open(dt.path + "indices.json", "r", encoding="utf-8") as f:
+        data = json.loads(f.read())
+        f.close()
+    return data
 
 
 class SaamError(Exception):

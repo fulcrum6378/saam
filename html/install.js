@@ -4,23 +4,7 @@
 
 $("#installer").fadeOut(1, function() { $(this).removeClass("invisible"); });
 $("#installer").fadeIn(600);
-$("#start").click(function() { start(); });
-function start() {
-    $("#installer :nth-child(1)").slideUp(200);
-    $("#installer :nth-child(2)").slideUp(200);
-    $("#start").fadeOut(200, function() { $(this).remove(); });
-    $("#loading").fadeOut(10, function() { $(this).removeClass("invisible"); });
-    $("#loading").fadeIn(600);
-    $.ajax({
-        url: "/action?q=install",
-        context: document.body,
-        timeout: 60000
-    }).done(function(data) {
-        if (data == "symbols_done") {
-            classify();
-        } else alert("FAILED: " + data);
-    });
-}
+$("#start").click(function() { classify(); });
 function classify() {
     $.ajax({
         url: "/action?q=classify",
