@@ -2,21 +2,39 @@
 # Github: https://github.com/fulcrum1378
 # All rights reserved.
 
-import ctypes
 import json
 import MetaTrader5 as mt5
 import os, os.path
+from pathlib import Path
+from platform import platform
 from pytz import timezone
+import shutil
 import sqlite3
 from time import sleep
 
 
 # noinspection PyGlobalUndefined
-def get_config():
-    global path, config, zone
-    for kk in connector: kk()
+def get_personal():
+    global path, per, temp
     path = os.path.realpath(__file__)[:-7].replace("\\", "/")
-    with open(path + "config.json", "r", encoding="utf-8") as f:
+    parent = "Documents" if not platform().startswith("Windows-7") else "My Documents"
+    user = str(Path.home()).replace("\\", "/") + "/"
+    per = user + parent + "/Saam/"
+    temp = per + "temp/"
+    if not os.path.exists(per):
+        os.makedirs(per)
+        shutil.copy(path + "config.json", per + "config.json")
+        shutil.copy(path + "main.db", per + "main.db")
+        shutil.copy(path + "link", user + "Desktop/Saam.lnk")
+        if not os.path.exists(temp):
+            os.makedirs(temp)
+
+
+# noinspection PyGlobalUndefined
+def get_config():
+    global config, per, zone
+    for kk in connector: kk()
+    with open(per + "config.json", "r", encoding="utf-8") as f:
         config = json.loads(f.read())
         f.close()
     zone = timezone(config["timezone"])
@@ -24,17 +42,17 @@ def get_config():
 
 # noinspection PyGlobalUndefined
 def save_config():
-    global path, config
-    with open(path + "config.json", "w", encoding="utf-8") as f:
+    global config, per
+    with open(per + "config.json", "w", encoding="utf-8") as f:
         f.write(json.dumps(config))
         f.close()
 
 
 # noinspection PyGlobalUndefined
 def do_connect():
-    global connect, path
+    global connect, per
     try:
-        connect = sqlite3.connect(path + "main.db", check_same_thread=False)
+        connect = sqlite3.connect(per + "main.db", check_same_thread=False)
     except:
         connect = None
     return connect
@@ -42,17 +60,16 @@ def do_connect():
 
 # noinspection PyGlobalUndefined
 def init_mofid():
-    global mofid
+    global mofid, mofid_path
     mofid = False
     if config["mofid_path"] is None:
-        possible = ["C:/Program Files/MofidTrader/terminal.exe",
-                    "C:/Program Files/MofidTrader/terminal64.exe",
-                    "C:/Program Files/MetaTrader 5/terminal.exe",
-                    "C:/Program Files/MetaTrader 5/terminal64.exe"]
+        possible = ["C:/Program Files/MofidTrader/terminal64.exe",
+                    "C:/Program Files/MofidTrader/terminal.exe",
+                    "C:/Program Files/MetaTrader 5/terminal64.exe",
+                    "C:/Program Files/MetaTrader 5/terminal.exe"]
         for pos in possible:
             if os.path.isfile(pos):
-                config["mofid_path"] = pos
-                save_config()
+                mofid_path = pos
                 break
         if config["mofid_path"] is None: return mofid
     if config["mofid_server"] is None:
@@ -60,7 +77,7 @@ def init_mofid():
         save_config()
     if config["mofid_login"] is None or config["mofid_pass"] is None:
         return mofid
-    mofid = mt5.initialize(config["mofid_path"],
+    mofid = mt5.initialize(mofid_path,
                            login=config["mofid_login"],
                            password=config["mofid_pass"],
                            server=config["mofid_server"])
@@ -103,15 +120,3 @@ def init_watcher(thread):
     global watcher
     watcher = thread
     watcher.start()
-
-
-def isAdmin():
-    try:
-        is_admin = (os.getuid() == 0)
-    except AttributeError:
-        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-    return is_admin
-
-
-def freeze():
-    while True: sleep(60)

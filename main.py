@@ -9,13 +9,10 @@ import webbrowser
 
 import data
 
+data.get_personal()
 data.get_config()
 
 import analyze, watch
-
-if not data.isAdmin():
-    print("RUN AS ADMINISTRATOR, PLEASE!!!")
-    data.freeze()
 
 print("SQLite:", data.do_connect() is not None)
 print("Mofid:", data.init_mofid(), "\n")

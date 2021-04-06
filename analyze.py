@@ -22,12 +22,10 @@ class Analyzer(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.active = True
-        self.temp = dt.path + 'temp/'
-        if not os.path.exists(self.temp):
-            os.makedirs(self.temp)
 
-    def fold(self):
-        return os.listdir(self.temp)
+    @staticmethod
+    def fold():
+        return os.listdir(dt.temp)
 
     def run(self):
         while self.active:
@@ -37,7 +35,7 @@ class Analyzer(Thread):
 
     @staticmethod
     def read_temp(path) -> dict:
-        with open(dt.path + 'temp/' + path, "r") as f:
+        with open(dt.temp + path, "r") as f:
             data = None
             try:
                 data = json.loads(f.read())
@@ -48,7 +46,7 @@ class Analyzer(Thread):
 
     @staticmethod
     def save_temp(path, data) -> None:
-        with open(dt.path + 'temp/' + path, "w") as f:
+        with open(dt.temp + path, "w") as f:
             f.write(json.dumps(data))
             f.close()
 
@@ -162,24 +160,24 @@ class Analyzer(Thread):
                          tzinfo=dt.zone).timestamp() if b is not None else None
         temp = {"action": action, "sym": sym, "timeframe": timeframe if timeframe is not None else None,
                 "start": unixA, "end": unixB, "state": 0}
-        each = os.listdir(dt.path + 'temp/')
+        each = os.listdir(dt.temp)
         new_name = 0
         while str(new_name) + ".json" in each:
             new_name += 1
-        with open(dt.path + 'temp/' + str(new_name) + ".json", "w") as f:
+        with open(dt.temp + str(new_name) + ".json", "w") as f:
             f.write(json.dumps(temp))
             f.close()
 
     @staticmethod
     def annihilate(path):
         try:
-            os.remove(dt.path + 'temp/' + path)
+            os.remove(dt.temp + path)
         except PermissionError:
             pass  # being used by another process
 
     @staticmethod
     def is_in_temp(sym, tfr) -> bool:
-        temp = os.listdir(dt.path + 'temp/')
+        temp = os.listdir(dt.temp)
         ret = False
         for f in temp:
             data = Analyzer.read_temp(f)
