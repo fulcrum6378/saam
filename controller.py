@@ -6,7 +6,6 @@ from datetime import datetime
 import json
 import MetaTrader5 as mt5
 import os
-from persiantools.jdatetime import JalaliDateTime
 from sqlite3 import OperationalError
 import pytse_client as tse
 import signal

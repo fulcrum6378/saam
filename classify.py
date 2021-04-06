@@ -2,7 +2,7 @@
 # Github: https://github.com/fulcrum1378
 # All rights reversed.
 
-import pytse_client as tse
+from pytse_client import Ticker
 from threading import Thread
 
 import data as dt
@@ -17,7 +17,7 @@ class Classify(Thread):
     def run(self):
         c = dt.cur(True)
         c.execute("SELECT * FROM symbol")  # gives the same tuple you inserted.
-        symbols = list()  # list of tuples
+        symbols = list()
         for i in c: symbols.append(i)
         dt.cur(False)
 
@@ -27,7 +27,7 @@ class Classify(Thread):
 
             # Find branch
             symbol_name = symbols[s][1]
-            branch = tse.Ticker(symbol_name).group_name  # fun.sql_esc()
+            branch = Ticker(symbol_name).group_name
             # print(branch)  # Persian not supported in Win7-CMD
             print("Classifying symbol", s, "of", sum_all)
 

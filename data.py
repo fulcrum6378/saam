@@ -45,7 +45,9 @@ def init_mofid():
     mofid = False
     if config["mofid_path"] is None:
         possible = ["C:/Program Files/MofidTrader/terminal.exe",
-                    "C:/Program Files/MofidTrader/terminal64.exe"]
+                    "C:/Program Files/MofidTrader/terminal64.exe",
+                    "C:/Program Files/MetaTrader 5/terminal.exe",
+                    "C:/Program Files/MetaTrader 5/terminal64.exe"]
         for pos in possible:
             if os.path.isfile(pos):
                 config["mofid_path"] = pos
