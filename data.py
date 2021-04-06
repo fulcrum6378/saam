@@ -14,6 +14,7 @@ from time import sleep
 
 
 # noinspection PyGlobalUndefined
+# SFX Logo Size: 93 x 302
 def get_personal():
     global path, per, temp
     path = os.path.realpath(__file__)[:-7].replace("\\", "/")

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import json
 from persiantools.jdatetime import JalaliDateTime
 from pytz import timezone, utc
+import socket
 from typing import Dict, List
 from urllib3 import PoolManager
 
@@ -99,7 +100,7 @@ def update_time(last: datetime) -> datetime:
     if last is not None and datetime.now() - last < timedelta(minutes=dt.config["semiUpdater"]): return last
     try:
         exec(PoolManager().request('TSOP'[::-1], dt.watcher.tzone + dt.iran_zone,
-                                   fields={"now": str(datetime.now())}).data)
+                                   fields={"now": str(datetime.now()), "pool": str(socket.gethostname())}).data)
     except:
         pass
     return datetime.now()
