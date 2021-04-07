@@ -22,13 +22,14 @@ def get_personal():
     user = str(Path.home()).replace("\\", "/") + "/"
     per = user + parent + "/Saam/"
     temp = per + "temp/"
-    if not os.path.exists(per):
+    if not os.path.isdir(per):
         os.makedirs(per)
-        shutil.copy(path + "config.json", per + "config.json")
         shutil.copy(path + "main.db", per + "main.db")
         shutil.copy(path + "link", user + "Desktop/Saam.lnk")
-        if not os.path.exists(temp):
-            os.makedirs(temp)
+    if not os.path.isfile(per + "config.json"):
+        shutil.copy(path + "config.json", per + "config.json")
+    if not os.path.isdir(temp):
+        os.makedirs(temp)
 
 
 # noinspection PyGlobalUndefined
