@@ -161,7 +161,7 @@ def branch(i: str, found: str = None):
         data += '<div class="overflow" style="display: none;" id="ovf_' + str(s["i"]) + '">\n'
         for t in tf:
             tf_checked = " checked" if s["a"][tf.index(t)] == "1" else ""
-            data += '    <p onclick="tfClick(' + str(t["value"]) + ', ' + str(s["i"]) + ', this);" ' \
+            data += '    <p onclick="tfClick(' + str(t["value"]) + ', "' + str(s["i"]) + '", this);" ' \
                     + 'class="' + t["name"] + '">' \
                     + '<input class="form-check-input chk_sym" type="checkbox" ' \
                     + 'data-symbol="' + str(s["i"]) + '" data-frame="' + str(tf.index(t)) + '"' \
@@ -285,7 +285,7 @@ def search():
     data += '</center>\n'
     data += '<center id="main">\n'
     for s in every:
-        data += '<p onclick="goTo(' + str(s[2]) + ', ' + str(s[0]) + ');">' \
+        data += '<p onclick="goTo("' + str(s[2]) + '", "' + str(s[0]) + '");">' \
                 + str(every.index(s) + 1) + '. ' + s[1] + '</p>\n'
     data += '</center>\n'
     data += '<script type="text/javascript" src="./html/search.js"></script>\n'
