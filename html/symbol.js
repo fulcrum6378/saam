@@ -89,9 +89,6 @@ function tfClick(v, sym, that) {
 }
 
 // Update Timeframes States
-function z(d) {
-    if (d < 10) return "0" + d; else return d;
-}
 function dateModel(cal) {
     let s = $("#dateSeparator").val(), t = $("#timeSeparator").val();
     return cal.Y+s+z(cal.M+1)+s+z(cal.D)+s+z(cal.H)+t+z(cal.I);
@@ -103,8 +100,8 @@ setInterval(() => {
         timeout: 4900
     }).done(function(data) {
         var state = JSON.parse(data);
-        for (d in state)
-            for (let f in state[d]["z"])
+        for (const d in state)
+            for (const f in state[d]["z"])
                 $("#ovf_" + state[d]["i"] + " > ." + f + " > span").html(state[d]["z"][f]);
     });
 }, 5000);

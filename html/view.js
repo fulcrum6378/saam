@@ -51,13 +51,6 @@ function updateTable() {
 
 
 // Deletion
-function z(d) {
-    if (d < 10) return "0" + d; else return d;
-}
-function dateModel(cal) {
-    let s = $("#dateSeparator").val(), t = $("#timeSeparator").val();
-    return cal.Y+s+z(cal.M+1)+s+z(cal.D)+s+z(cal.H)+t+z(cal.I);
-}
 function omit() {
     let cal = new SolarHijri(new Date()),
         def = dateModel(cal) +" - "+ dateModel(cal),

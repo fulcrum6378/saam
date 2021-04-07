@@ -10,9 +10,6 @@ for (i = 0; i < all.length; i++) {
         .css("margin-right", dist + "px")
         .animate({opacity: 1, marginRight: 0}, dist + (60 * i));
 }
-function branch(i) {
-    location.assign(location.href + "branch?i=" + i);
-}
 
 
 // Floating Menu
@@ -54,10 +51,4 @@ function shutdown() {
         timeout: 10000,
         error: onOff
     })
-}
-function search() {
-    location.assign(location.href + "search");
-}
-function settings() {
-    location.assign(location.href + "settings");
 }
