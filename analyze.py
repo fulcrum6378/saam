@@ -174,6 +174,8 @@ class Analyzer(Thread):
             os.remove(dt.temp + path)
         except PermissionError:
             pass  # being used by another process
+        except FileNotFoundError:
+            pass
 
     @staticmethod
     def is_in_temp(sym, tfr) -> bool:

@@ -3,9 +3,10 @@
 # All rights reserved.
 
 
-import simple_http_server.server as server
 import socket
 import webbrowser
+
+import simple_http_server.server as server
 
 import data
 

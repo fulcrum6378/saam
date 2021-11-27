@@ -3,16 +3,17 @@
 # All rights reserved.
 
 from datetime import datetime, timedelta
-import MetaTrader5 as mt5
-from pytz import utc
 from sqlite3 import OperationalError
 from threading import Thread
 from time import sleep
 from typing import List
 
-from analyze import Analyzer
+import MetaTrader5 as mt5
+from pytz import utc
+
 import data as dt
 import func as fn
+from analyze import Analyzer
 from func import update_time
 
 

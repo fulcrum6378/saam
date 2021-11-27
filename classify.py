@@ -2,11 +2,12 @@
 # Github: https://github.com/fulcrum1378
 # All rights reversed.
 
-import MetaTrader5 as mt5
 import re
+from threading import Thread
+
+import MetaTrader5 as mt5
 import requests
 from requests.adapters import HTTPAdapter
-from threading import Thread
 from urllib3 import Retry
 
 import data as dt

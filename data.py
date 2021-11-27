@@ -3,14 +3,16 @@
 # All rights reserved.
 
 import json
-import MetaTrader5 as mt5
-import os, os.path
-from pathlib import Path
-from platform import platform
-from pytz import timezone
+import os
+import os.path
 import shutil
 import sqlite3
+from pathlib import Path
+from platform import platform
 from time import sleep
+
+import MetaTrader5 as mt5
+from pytz import timezone
 
 
 # noinspection PyGlobalUndefined

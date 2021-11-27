@@ -2,18 +2,19 @@
 # StackOverFlow: https://stackoverflow.com/users/10728785/mahdi-parastesh
 # All rights reserved.
 
-from datetime import datetime
 import json
-import MetaTrader5 as mt5
 import os
-from sqlite3 import OperationalError
 import signal
+from datetime import datetime
+from sqlite3 import OperationalError
+
+import MetaTrader5 as mt5
 from simple_http_server import request_map, PathValue, Headers, StaticFile
 
-from analyze import Analyzer
-from classify import Classify
 import data as dt
 import func as fn
+from analyze import Analyzer
+from classify import Classify
 
 
 @request_map("/")
